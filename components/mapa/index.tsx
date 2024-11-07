@@ -4,11 +4,13 @@
 import { useEffect, useRef, useState } from "react";
 import maplibre from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import Popup from "./popup";
 
 export default function MapComponent() {
   const mapContainer = useRef(null);
 
   const [map, setMap] = useState<any>(null);
+  const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [streetInfo, setStreetInfo] = useState<any>(null);
 
   function getColor(prioridad: number) {
@@ -16,11 +18,11 @@ export default function MapComponent() {
       case 0:
         return "rgba(61, 216, 114, 0)";
       case 1:
-        return "rgba(216, 61, 86, 0.7)";
+        return "rgba(61, 216, 114, 0.7)";
       case 2:
         return "rgba(216, 191, 61, 0.7)";
       case 3:
-        return "rgba(61, 216, 114, 0.7)";
+        return "rgba(216, 61, 86, 0.7)";
     }
   }
 
@@ -72,23 +74,10 @@ export default function MapComponent() {
         });
       });
 
-      // map.addLayer({
-      //   id: "streets-layer",
-      //   type: "line",
-      //   source: "streets",
-      //   paint: {
-      //     "line-color": [
-      //       "case",
-      //       ["!=", ["get", "color"], ""], // Si la propiedad 'color' no es null
-      //       ["get", "color"], // Aplica el color de la propiedad 'color'
-      //       "rgba(255, 255, 255, 0 )", // Si no tiene color, no dibujes la línea (transparente)
-      //     ],
-      //     "line-width": 15,
-      //   },
-      // });
+      setMap(map);
 
       map.on("click", "streets-layer", async (e) => {
-        console.log("first");
+        console.log("click event");
         if (e.features && e.features[0]?.properties) {
           const props = e.features[0].properties;
           const info = {
@@ -97,10 +86,9 @@ export default function MapComponent() {
             comentario: props.comentario,
           };
           setStreetInfo({ ...info, lngLat: e.lngLat });
+          setOpenPopup(true);
         }
       });
-
-      setMap(map);
 
       return () => map.remove();
     }
@@ -110,9 +98,14 @@ export default function MapComponent() {
     <>
       <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />
       {streetInfo && (
-        <p>Hola</p>
-        // <StreetPopup streetInfo={streetInfo} map={map} onClose={() => setStreetInfo(null)} />
+        <Popup
+          streetInfo={streetInfo}
+          setOpenPopup={setOpenPopup}
+          open={openPopup}
+          map={map}
+        />
       )}
+      {/* <Popup streetInfo={streetInfo} map={map} /> */}
     </>
   );
 }
