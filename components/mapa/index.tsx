@@ -23,20 +23,20 @@ export default function MapComponent() {
       const map = new maplibre.Map({
         container: mapContainer.current,
         style:
-          "https://api.maptiler.com/maps/basic-v2/style.json?key=0SnBvUuoJRBy5F6INdTN", // URL de estilo de MapLibre
+          "https://api.maptiler.com/maps/dataviz/style.json?key=gI4Oo4FqdNdASpvMjsac", // URL de estilo de MapLibre
         center: [-0.376488, 39.477814],
         zoom: 12,
       });
 
       map.on("load", async () => {
         // Cargar el archivo GeoJSON
-        const geojsonData = await fetch("carreteras.geojson").then((response) =>
+        const geojsonData = await fetch("/carreteras.geojson").then((response) =>
           response.json()
         );
 
         // Hacer una única llamada para obtener todos los colores de las calles
         const colorsResponse = await fetch(
-          "http://localhost:3000/get-all-street-colors"
+          "http://localhost:4000/get-all-street-colors"
         );
         const colorsData = await colorsResponse.json();
 
@@ -72,14 +72,10 @@ export default function MapComponent() {
           type: "line",
           source: "streets",
           paint: {
-            "line-color": [
-              "case",
-              ["!=", ["get", "color"], ""],
-              ["get", "color"],
-              "rgba(255, 255, 255, 0 )",
-            ],
-            "line-width": 15,
+            'line-color': ['get', 'color'],      // Aplica el color de la propiedad 'color'
+            'line-width': 10,
           },
+          filter: ['has', 'color']   
         });
       });
 
