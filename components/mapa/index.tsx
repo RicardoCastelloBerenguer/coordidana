@@ -69,8 +69,7 @@ export default function MapComponent() {
           paint: {
             "line-color": ["get", "color"], // Aplica el color de la propiedad 'color'
             "line-width": 10,
-          },
-          filter: ["has", "color"],
+          }
         });
       });
 
@@ -88,6 +87,17 @@ export default function MapComponent() {
           setStreetInfo({ ...info, lngLat: e.lngLat });
           setOpenPopup(true);
         }
+      });
+
+      
+      // Cambia el cursor a "pointer" cuando pase sobre una calle
+      map.on('mouseenter', 'streets-layer', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      // Cambia el cursor a "default" cuando salga de una calle
+      map.on('mouseleave', 'streets-layer', () => {
+        map.getCanvas().style.cursor = '';
       });
 
       return () => map.remove();
