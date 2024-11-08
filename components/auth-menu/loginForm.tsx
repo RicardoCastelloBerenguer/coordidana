@@ -32,7 +32,7 @@ const LoginForm = ({
           name="usernameLogin"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email/Nombre usuario</FormLabel>
+              <FormLabel>Email / Nombre usuario</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Introduce tu Email o Nombre de usuario..."

@@ -53,18 +53,7 @@ const LocationModal: React.FC<LocationProps> = ({
     useEffect(() => {
         if (ubicacion) {
             
-            if (map) {
-                //TODO DESCOMENTAR
-                /*
-                map.flyTo({
-                  center: [ubicacion.longitude, ubicacion.latitude], // Coordenadas de la ubicación
-                  zoom: 18, // Nivel de zoom
-                  essential: true, // Indica que la animación es necesaria
-                });
-                */
-              }
               onLocationUpdate(ubicacion);
-          console.log("La ubicación se ha actualizado:", ubicacion);
         }
       }, [ubicacion]);
 
@@ -97,7 +86,7 @@ const LocationModal: React.FC<LocationProps> = ({
           <DialogHeader>
             <DialogTitle>Necesitamos tu ubicación</DialogTitle>
             <DialogDescription>
-              Para posicionarte en el mapa necesitamos que nos des acceso a tu ubicación.
+              Para contribuir aportando datos necesitamos que nos des acceso a tu ubicación.
             </DialogDescription>
           </DialogHeader>
           <div >
