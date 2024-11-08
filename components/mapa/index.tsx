@@ -133,7 +133,7 @@ export default function MapComponent() {
         );
 
         // Hacer una única llamada para obtener todos los colores de las calles
-        const colorsResponse = await fetch("http://192.168.1.45:4000/prioridades");
+        const colorsResponse = await fetch("http://localhost:4000/prioridades");
         const colorsData = await colorsResponse.json();
         
         // Iterar sobre las características del GeoJSON y asignar el color de la base de datos
@@ -168,7 +168,7 @@ export default function MapComponent() {
           (response) => response.json()
         );
         
-        const coloresGarajesResponse = await fetch("http://192.168.1.45:4000/colores-garajes");
+        const coloresGarajesResponse = await fetch("http://localhost:4000/colores-garajes");
         const coloresGarajes = await coloresGarajesResponse.json();
 
         geojsonGarajesData.features.forEach((feature: any) => {
@@ -225,7 +225,7 @@ export default function MapComponent() {
             const props = e.features[0].properties;
 
             const response = await fetch(
-              `http://192.168.1.45:4000/garaje/${props.ID}`,
+              `http://localhost:4000/garaje/${props.ID}`,
               {
                 method: "GET",
                 headers: {
