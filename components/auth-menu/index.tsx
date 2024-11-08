@@ -52,6 +52,7 @@ import { useForm } from "react-hook-form";
 import RegisterForm from "./registerForm";
 import LoginForm from "./loginForm";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "../../app/contexts/UserContext";
 
 interface AuthMenuProps {
   children: ReactNode; // `children` puede ser cualquier tipo de contenido renderizable
@@ -61,7 +62,9 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
   const { toast } = useToast();
 
   const [open, setOpen] = useState(false);
-  const [login, setLogin] = useState(false);
+  const [login, setLogin] = useState(true);
+
+  const { login: loginUser } = useUser();
 
   const formRegister = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -135,7 +138,9 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
       });
 
       if (response.ok) {
-        toast({ title: "Te has registrado correctamente" });
+        toast({ title: "Has iniciado sesión correctamente" });
+        let data = await response.json();
+        loginUser(data.usuario);
         console.log("ok");
       } else {
         let errorData = await response.json();
