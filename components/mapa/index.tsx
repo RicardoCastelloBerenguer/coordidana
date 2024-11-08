@@ -390,7 +390,7 @@ export default function MapComponent() {
 
       <Button
         variant={"outline"}
-        className="absolute z-50 top-0 sm:top-32 right-10 w-auto m-5"
+        className="absolute z-40 top-0 sm:top-32 right-10 w-auto m-5"
       >
         <LocateFixed size={20} className="size-28" />
       </Button>
