@@ -51,12 +51,15 @@ import {
 import { useForm } from "react-hook-form";
 import RegisterForm from "./registerForm";
 import LoginForm from "./loginForm";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthMenuProps {
   children: ReactNode; // `children` puede ser cualquier tipo de contenido renderizable
 }
 
 const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
+  const { toast } = useToast();
+
   const [open, setOpen] = useState(false);
   const [login, setLogin] = useState(false);
 
@@ -98,10 +101,15 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
       );
 
       if (response.ok) {
-        let errorData = response.json();
-        console.log(errorData);
+        console.log("first");
+        toast({ title: "Te has registrado correctamente" });
       } else {
         let errorData = await response.json();
+        toast({
+          title: "Error",
+          variant: "destructive",
+          description: errorData.message,
+        });
         console.log(errorData);
       }
     } catch (error) {
@@ -127,8 +135,15 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
       });
 
       if (response.ok) {
+        toast({ title: "Te has registrado correctamente" });
         console.log("ok");
       } else {
+        let errorData = await response.json();
+        toast({
+          title: "Error",
+          variant: "destructive",
+          description: errorData.message,
+        });
         console.log("not ok");
       }
     } catch (error) {

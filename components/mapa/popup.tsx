@@ -27,6 +27,7 @@ import { createPortal } from "react-dom";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import getPrioridad from "@/lib/getPrioridad";
+import { useToast } from "@/hooks/use-toast";
 
 interface PopupProps {
   open: boolean;
@@ -53,7 +54,7 @@ const Popup: React.FC<PopupProps> = ({
   const [isHayVehiculos, setIsHayVehiculos] = useState(false);
   const [isEscombros, setIsEscombros] = useState(false);
   const [comentario, setComentario] = useState("");
-
+  const { toast } = useToast();
   const emptyForm = () => {
     setComentario("");
     setIsEscombros(false);
@@ -90,10 +91,18 @@ const Popup: React.FC<PopupProps> = ({
 
       const data = await response.json();
 
-      console.log("Respuesta del servidor:", data);
-
       if (!response.ok) {
-        throw new Error(data.message || "Error al guardar el reporte");
+        toast({
+          title: "Error guardando reporte",
+          description: "Estamos teniendo problemas actualmente",
+          variant: "destructive",
+        });
+        // throw new Error(data.message || "Error al guardar el reporte");
+      } else {
+        console.log("first");
+        toast({
+          title: "Reporte guardado correctamente",
+        });
       }
 
       emptyForm();

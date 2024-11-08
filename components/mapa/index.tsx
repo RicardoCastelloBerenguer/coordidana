@@ -13,7 +13,7 @@ import { features } from "process";
 
 import LocationModal from "./LocationModal";
 import { Button } from "../ui/button";
-import { LocateFixed } from "lucide-react";
+import { LoaderCircle, LocateFixed } from "lucide-react";
 
 interface Ubicacion {
   latitude: number;
@@ -24,6 +24,7 @@ export default function MapComponent() {
   const mapContainer = useRef(null);
 
   const [map, setMap] = useState<any>(null);
+  const [loading, setOnloading] = useState<boolean>(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [streetInfo, setStreetInfo] = useState<any>(null);
   const [garajeInfo, setGarajeInfo] = useState<any>(null);
@@ -127,6 +128,7 @@ export default function MapComponent() {
       });
 
       map.on("load", async () => {
+        setOnloading(true);
         setOpenPopupPermisos(true);
         // Cargar el archivo GeoJSON
         const geojsonData = await fetch("/carreteras.geojson").then(
@@ -199,6 +201,7 @@ export default function MapComponent() {
             "fill-color": ["get", "color"],
           },
         });
+        setOnloading(false);
       });
 
       setMap(map);
@@ -298,7 +301,18 @@ export default function MapComponent() {
           onLocationUpdate={handleUbicacionUpdate}
         />
       </div>
-      <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />
+
+      <div className="relative w-full h-screen">
+        <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />
+        {loading && (
+          <div className="absolute top-14 left-0 right-0 bottom-0 flex justify-center items-center z-50">
+            <div className="flex flex-col items-center justify-center gap-2">
+              <LoaderCircle className="animate-spin size-20" />
+              <span>Cargando datos del mapa...</span>
+            </div>
+          </div>
+        )}
+      </div>
 
       {garajeInfo && (
         <PopupGaraje
