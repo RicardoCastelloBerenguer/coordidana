@@ -26,6 +26,7 @@ import maplibregl from "maplibre-gl";
 import { createPortal } from "react-dom";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
+import getPrioridad from "@/lib/getPrioridad";
 
 interface PopupProps {
   open: boolean;
@@ -36,6 +37,7 @@ interface PopupProps {
     lngLat: any | null;
     comentario: string | null;
   } | null;
+  updateMapa: any;
   map: maplibregl.Map;
 }
 
@@ -44,17 +46,12 @@ const Popup: React.FC<PopupProps> = ({
   setOpenPopup,
   open,
   map,
+  updateMapa,
 }) => {
   const [isNoTransitable, setIsNoTransitable] = useState(false);
   const [isHayVehiculos, setIsHayVehiculos] = useState(false);
   const [isEscombros, setIsEscombros] = useState(false);
   const [comentario, setComentario] = useState("");
-
-  const getPrioridad = () => {
-    if (!isNoTransitable && !isHayVehiculos && !isEscombros) return 1;
-    else if (isNoTransitable) return 3;
-    else return 2;
-  };
 
   const emptyForm = () => {
     setComentario("");
@@ -68,13 +65,14 @@ const Popup: React.FC<PopupProps> = ({
     e.preventDefault();
 
     const reporte = {
+      id_tramo: streetInfo!.id_tramo,
       nombre: streetInfo!.nombre,
       comentario: comentario,
       transitable: !isNoTransitable,
       coches: isHayVehiculos,
       escombros: isEscombros,
       idUsuario: 123,
-      prioridad: getPrioridad(),
+      prioridad: getPrioridad(isNoTransitable, isHayVehiculos, isEscombros),
     };
 
     try {
@@ -90,6 +88,7 @@ const Popup: React.FC<PopupProps> = ({
       );
 
       const data = await response.json();
+
       console.log("Respuesta del servidor:", data);
 
       if (!response.ok) {
@@ -97,6 +96,15 @@ const Popup: React.FC<PopupProps> = ({
       }
 
       emptyForm();
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+    }
+    try {
+      const response = await fetch(
+        `http://localhost:4000/tramo/${streetInfo!.id_tramo}`
+      );
+      const data = await response.json();
+      updateMapa({ id_tramo: streetInfo!.id_tramo, prioridad: data.prioridad });
     } catch (error) {
       console.error("Error en la solicitud:", error);
     }

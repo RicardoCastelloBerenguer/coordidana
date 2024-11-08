@@ -5,6 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import maplibre from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Popup from "./popup";
+
+import getPrioridad from "@/lib/getPrioridad";
+
 import PopupGaraje from "./popup-garajes";
 
 export default function MapComponent() {
@@ -15,8 +18,20 @@ export default function MapComponent() {
   const [streetInfo, setStreetInfo] = useState<any>(null);
   const [garajeInfo, setGarajeInfo] = useState<any>(null);
 
+
+  function updateStreetColorInMap(row: any) {
+    const source = map.getSource("streets");
+       // Buscar la calle específica por su ID
+    
+    geojsonData.features.forEach((feature: any) => {
+      if (feature.properties.id_tramo == row.id_tramo) {
+        feature.properties.color = getColorByPrioridad(row.prioridad) || null;
+        // Actualizar la fuente de datos del mapa con el nuevo GeoJSON
+        source.setData(geojsonData);
+      }
+    });
+  }
   function updateGarajeColorInMap(codigo: any, estado: any) {
-    // Asumimos que 'streetsLayer' es la capa de MapLibre que contiene las calles
     const source = map.getSource("garajes");
 
     // Obtener el GeoJSON de la fuente
@@ -102,7 +117,7 @@ export default function MapComponent() {
           paint: {
             "line-color": ["get", "color"], // Aplica el color de la propiedad 'color'
             "line-width": 10,
-          }
+          },
         });
         
         //PARKING
@@ -179,13 +194,13 @@ export default function MapComponent() {
 
       
       // Cambia el cursor a "pointer" cuando pase sobre una calle
-      map.on('mouseenter', 'streets-layer', () => {
-        map.getCanvas().style.cursor = 'pointer';
+      map.on("mouseenter", "streets-layer", () => {
+        map.getCanvas().style.cursor = "pointer";
       });
 
       // Cambia el cursor a "default" cuando salga de una calle
-      map.on('mouseleave', 'streets-layer', () => {
-        map.getCanvas().style.cursor = '';
+      map.on("mouseleave", "streets-layer", () => {
+        map.getCanvas().style.cursor = "";
       });
 
       // Cambia el cursor a "pointer" cuando pase sobre una calle
@@ -211,6 +226,7 @@ export default function MapComponent() {
           setOpenPopup={setOpenPopup}
           open={openPopup}
           map={map}
+          updateMapa={updateStreetColorInMap}
         />
       )}
       {garajeInfo && (
