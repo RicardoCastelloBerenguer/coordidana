@@ -9,6 +9,7 @@ import Popup from "./popup";
 import getPrioridad from "@/lib/getPrioridad";
 
 import PopupGaraje from "./popup-garajes";
+import { features } from "process";
 
 export default function MapComponent() {
   const mapContainer = useRef(null);
@@ -127,8 +128,16 @@ export default function MapComponent() {
         const geojsonGarajesData = await fetch("/garajes.geojson").then(
           (response) => response.json()
         );
+        
+        const coloresGarajesResponse = await fetch("http://localhost:4000/colores-garajes");
+        const coloresGarajes = await coloresGarajesResponse.json();
+
         geojsonGarajesData.features.forEach((feature: any) => {
-          feature.properties.color = getColorByEstado(0);
+          if(coloresGarajes[feature.properties.ID]){
+            feature.properties.color = getColorByEstado(coloresGarajes[feature.properties.ID].estado);
+          } else {
+            feature.properties.color = getColorByEstado(0);
+          }
         });
         map.addSource("garajes", {
           type: "geojson",
