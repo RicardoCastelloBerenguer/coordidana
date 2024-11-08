@@ -78,7 +78,7 @@ const Popup: React.FC<PopupProps> = ({
 
     try {
       const response = await fetch(
-        `http://localhost:4000/reportes/${streetInfo!.id_tramo}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/reportes/${streetInfo!.id_tramo}`,
         {
           method: "POST",
           headers: {
@@ -102,7 +102,7 @@ const Popup: React.FC<PopupProps> = ({
     }
     try {
       const response = await fetch(
-        `http://localhost:4000/tramo/${streetInfo!.id_tramo}`
+        `${process.env.NEXT_PUBLIC_API_URL}/tramo/${streetInfo!.id_tramo}`
       );
       const data = await response.json();
       updateMapa({ id_tramo: streetInfo!.id_tramo, prioridad: data.prioridad });
@@ -130,7 +130,7 @@ const Popup: React.FC<PopupProps> = ({
                   checked={isLimpia}
                   onCheckedChange={(checked: any) => {
                     setIsLimpia(checked);
-                    if(checked){
+                    if (checked) {
                       setIsNoTransitable(false);
                       setIsHayVehiculos(false);
                       setIsEscombros(false);
@@ -145,7 +145,7 @@ const Popup: React.FC<PopupProps> = ({
                   checked={isNoTransitable}
                   onCheckedChange={(checked: any) => {
                     setIsNoTransitable(checked);
-                    if(checked){
+                    if (checked) {
                       setIsLimpia(false);
                     }
                   }}
@@ -159,7 +159,7 @@ const Popup: React.FC<PopupProps> = ({
                   checked={isHayVehiculos}
                   onCheckedChange={(checked: any) => {
                     setIsHayVehiculos(checked);
-                    if(checked){
+                    if (checked) {
                       setIsLimpia(false);
                     }
                   }}
@@ -173,7 +173,7 @@ const Popup: React.FC<PopupProps> = ({
                   checked={isEscombros}
                   onCheckedChange={(checked: any) => {
                     setIsEscombros(checked);
-                    if(checked){
+                    if (checked) {
                       setIsLimpia(false);
                     }
                   }}
