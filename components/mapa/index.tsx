@@ -12,6 +12,8 @@ import PopupGaraje from "./popup-garajes";
 import { features } from "process";
 
 import LocationModal from "./LocationModal";
+import { Button } from "../ui/button";
+import { LocateFixed } from "lucide-react";
 
 interface Ubicacion {
   latitude: number;
@@ -316,6 +318,13 @@ export default function MapComponent() {
           updateMapa={updateStreetColorInMap}
         />
       )}
+
+      <Button
+        variant={"outline"}
+        className="absolute z-50 top-0 sm:top-32 right-10 w-auto m-5"
+      >
+        <LocateFixed size={20} className="size-28" />
+      </Button>
       {/* <Popup streetInfo={streetInfo} map={map} /> */}
     </>
   );

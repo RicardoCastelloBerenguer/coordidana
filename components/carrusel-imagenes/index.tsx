@@ -26,7 +26,7 @@ const CarruselImagenes = ({
           align: "start",
         }}
         orientation="vertical"
-        className="w-full max-w-xs"
+        className="w-full max-w-xs mb-10"
       >
         <CarouselContent className="-mt-1 h-[400px]">
           {Array.from({ length: imgCount }).map((_, index) => (

@@ -1,14 +1,27 @@
 import Link from "next/link";
 import React from "react";
-import { buttonVariants } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import Image from "next/image";
+import AuthMenu from "../auth-menu";
 
-const Navbar = ({ className }: { className?: string }) => {
+const Navbar = ({
+  className,
+  setOpen,
+}: {
+  className?: string;
+  setOpen?: (open: boolean) => void;
+}) => {
+  const handleClose = () => {
+    if (setOpen) {
+      setOpen(false);
+    }
+  };
+
   return (
     <ul
       className={`flex items-center justify-center gap-6  pb-6 sm:p-2 flex-col sm:flex-row ${className}`}
     >
-      <Link href={"/"}>
+      <Link onClick={handleClose} href={"/"}>
         <Image
           src="/logo_completo.png" // Ruta de la imagen
           alt="Logo de la página web" // Texto alternativo para la imagen
@@ -19,13 +32,18 @@ const Navbar = ({ className }: { className?: string }) => {
       </Link>
 
       <li>
-        <Link className={buttonVariants({ variant: "outline" })} href={"/"}>
+        <Link
+          onClick={handleClose}
+          className={buttonVariants({ variant: "outline" })}
+          href={"/"}
+        >
           Mapa
         </Link>
       </li>
 
       <li>
         <Link
+          onClick={handleClose}
           className={buttonVariants({ variant: "outline" })}
           href={"/comoUsar"}
         >
@@ -34,15 +52,9 @@ const Navbar = ({ className }: { className?: string }) => {
       </li>
 
       <li>
-        <Link className={buttonVariants({ variant: "outline" })} href={"/"}>
-          Que es Coordidana
-        </Link>
-      </li>
-
-      <li>
-        <Link className={buttonVariants({ variant: "outline" })} href={"/"}>
-          Iniciar Sesión
-        </Link>
+        <AuthMenu>
+          <Button variant={"outline"}>Iniciar Sesión</Button>
+        </AuthMenu>
       </li>
     </ul>
   );
