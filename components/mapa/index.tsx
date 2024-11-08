@@ -11,6 +11,13 @@ import getPrioridad from "@/lib/getPrioridad";
 import PopupGaraje from "./popup-garajes";
 import { features } from "process";
 
+import LocationModal from "./LocationModal";
+
+interface Ubicacion {
+  latitude: number;
+  longitude: number;
+}
+
 export default function MapComponent() {
   const mapContainer = useRef(null);
 
@@ -19,12 +26,24 @@ export default function MapComponent() {
   const [streetInfo, setStreetInfo] = useState<any>(null);
   const [garajeInfo, setGarajeInfo] = useState<any>(null);
   const [openPopupGaraje, setOpenPopupGaraje] = useState<boolean>(false);
+  const [openPopupPermisos, setOpenPopupPermisos] = useState<boolean>(false);
+  const [ubicacion, setUbicacion] = useState<Ubicacion | null>(null);
 
+  const DISTANCIA_LIMITE =50;
+
+  const ubicacionRef = useRef(ubicacion);
+
+  const handleUbicacionUpdate = (newUbicacion: any) => {
+    setUbicacion(newUbicacion); // Actualiza el estado de location
+  };
+
+  useEffect(() => {
+    ubicacionRef.current = ubicacion; // Actualiza el ref cuando cambia `ubicacion`
+  }, [ubicacion]);
 
   function updateStreetColorInMap(row: any) {
     const source = map.getSource("streets");
        // Buscar la calle específica por su ID
-    
        const geojsonData = source._data;
     geojsonData.features.forEach((feature: any) => {
       if (feature.properties.id_tramo == row.id_tramo) {
@@ -58,7 +77,7 @@ export default function MapComponent() {
       case 1:
         return "rgba(61, 216, 114, 0.7)";
       case 2:
-        return "rgba(216, 191, 61, 0.7)";
+        return "rgba(255, 222, 89, 0.7)";
       case 3:
         return "rgba(216, 61, 86, 0.7)";
     }
@@ -69,12 +88,30 @@ export default function MapComponent() {
       case 0:
         return "rgba(46, 41, 78, 0.15)";
       case 1:
-        return "rgba(61, 216, 114, 0.8)";
+        return "rgba(126, 217, 87, 0.8)";
       case 2:
-        return "rgba(209, 142, 56, 0.8)";
+        return "rgba(178, 147, 91, 0.8)";
       case 3:
-        return "rgba(56, 125, 209, 0.8)";
+        return "rgba(12, 192, 223, 0.8)";
     }
+  }
+
+  function haversine(lat1:number, lon1:number, lat2:number, lon2:number) {
+    const toRad = (angle: number) => (angle * Math.PI) / 180;
+  
+    const R = 6371; // Radio de la Tierra en kilómetros
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+  
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+  
+    return distance; // Devuelve la distancia en kilómetros
   }
 
   useEffect(() => {
@@ -88,13 +125,15 @@ export default function MapComponent() {
       });
 
       map.on("load", async () => {
+        
+        setOpenPopupPermisos(true);
         // Cargar el archivo GeoJSON
         const geojsonData = await fetch("/carreteras.geojson").then(
           (response) => response.json()
         );
 
         // Hacer una única llamada para obtener todos los colores de las calles
-        const colorsResponse = await fetch("http://localhost:4000/prioridades");
+        const colorsResponse = await fetch("http://192.168.1.45:4000/prioridades");
         const colorsData = await colorsResponse.json();
         
         // Iterar sobre las características del GeoJSON y asignar el color de la base de datos
@@ -119,7 +158,7 @@ export default function MapComponent() {
           source: "streets",
           paint: {
             "line-color": ["get", "color"], // Aplica el color de la propiedad 'color'
-            "line-width": 10,
+            "line-width": 12,
           },
         });
         
@@ -129,7 +168,7 @@ export default function MapComponent() {
           (response) => response.json()
         );
         
-        const coloresGarajesResponse = await fetch("http://localhost:4000/colores-garajes");
+        const coloresGarajesResponse = await fetch("http://192.168.1.45:4000/colores-garajes");
         const coloresGarajes = await coloresGarajesResponse.json();
 
         geojsonGarajesData.features.forEach((feature: any) => {
@@ -153,53 +192,65 @@ export default function MapComponent() {
               'fill-color': ["get", "color"]
           }
         });
+
       });
       
 
       setMap(map);
 
       map.on("click", "streets-layer", async (e) => {
-        if (e.features && e.features[0]?.properties) {
-          const props = e.features[0].properties;
-          const info = {
-            id_tramo: props.id_tramo,
-            nombre: props.nombre,
-            comentario: props.comentario,
-          };
-          setStreetInfo({ ...info, lngLat: e.lngLat });
-          setOpenPopup(true);
-        }
+        //TODO DESCOMENTAR
+        //if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
+
+          if (e.features && e.features[0]?.properties) {
+            const props = e.features[0].properties;
+            const info = {
+              id_tramo: props.id_tramo,
+              nombre: props.nombre,
+              comentario: props.comentario,
+            };
+            setStreetInfo({ ...info, lngLat: e.lngLat });
+            setOpenPopup(true);
+          }
+        /*} else {
+          //SI NO ESTA SE SOLICITA OTRA VEZ
+        }*/
       });
 
       
       map.on("click", "garajes-layer", async (e) => {
-        if (e.features && e.features[0]?.properties ) {
-          const props = e.features[0].properties;
+        if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
 
-          const response = await fetch(
-            `http://localhost:4000/garaje/${props.ID}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
+          if (e.features && e.features[0]?.properties ) {
+            const props = e.features[0].properties;
+
+            const response = await fetch(
+              `http://192.168.1.45:4000/garaje/${props.ID}`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                }
               }
+            );
+            
+            const data = await response.json();
+            console.log("Respuesta del servidor:", data);
+      
+            if (!response.ok) {
+              throw new Error(data.message || "Error al recuperar el garaje");
             }
-          );
-          
-          const data = await response.json();
-          console.log("Respuesta del servidor:", data);
-    
-          if (!response.ok) {
-            throw new Error(data.message || "Error al recuperar el garaje");
-          }
 
-          const info = {
-            codigo: props.ID,
-            estado: data.estado,
-            comentario: data.comentario
-          };
-          setGarajeInfo({ ...info, lngLat: e.lngLat });
-          setOpenPopupGaraje(true);
+            const info = {
+              codigo: props.ID,
+              estado: data.estado,
+              comentario: data.comentario
+            };
+            setGarajeInfo({ ...info, lngLat: e.lngLat });
+            setOpenPopupGaraje(true);
+          }
+        } else {
+          //SI NO ESTA SE SOLICITA OTRA VEZ
         }
       });
 
@@ -230,6 +281,14 @@ export default function MapComponent() {
 
   return (
     <>
+    <div>
+      <LocationModal 
+          setOpenPopup={setOpenPopupPermisos}
+          map={map}
+          open={openPopupPermisos}
+          onLocationUpdate={handleUbicacionUpdate}
+          />
+    </div>
       <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />
       
       {garajeInfo && (
