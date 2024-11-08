@@ -1,7 +1,8 @@
 import Link from "next/link";
 import React from "react";
-import { buttonVariants } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import Image from "next/image";
+import AuthMenu from "../auth-menu";
 
 const Navbar = ({ className }: { className?: string }) => {
   return (
@@ -34,15 +35,9 @@ const Navbar = ({ className }: { className?: string }) => {
       </li>
 
       <li>
-        <Link className={buttonVariants({ variant: "outline" })} href={"/"}>
-          Que es Coordidana
-        </Link>
-      </li>
-
-      <li>
-        <Link className={buttonVariants({ variant: "outline" })} href={"/"}>
-          Iniciar Sesión
-        </Link>
+        <AuthMenu>
+          <Button variant={"outline"}>Iniciar Sesión</Button>
+        </AuthMenu>
       </li>
     </ul>
   );
