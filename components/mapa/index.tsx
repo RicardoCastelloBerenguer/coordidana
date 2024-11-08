@@ -41,6 +41,17 @@ export default function MapComponent() {
     setUbicacion(newUbicacion); // Actualiza el estado de location
   };
 
+  const handleCentrarUbicacion = () => {
+    
+                map.flyTo({
+                  center: [ubicacionRef.current!.longitude, ubicacionRef.current!.latitude], // Coordenadas de la ubicación
+                  zoom: 18, // Nivel de zoom
+                  essential: true, // Indica que la animación es necesaria
+                });
+               
+  };
+
+
   useEffect(() => {
     ubicacionRef.current = ubicacion; // Actualiza el ref cuando cambia `ubicacion`
   }, [ubicacion]);
@@ -141,7 +152,9 @@ export default function MapComponent() {
       });
 
       map.on("load", async () => {
-        setOpenPopupPermisos(true);
+        if(!ubicacionRef || !ubicacionRef.current){
+          setOpenPopupPermisos(true);
+        }
         // Cargar el archivo GeoJSON
         const geojsonData = await fetch("/carreteras.geojson").then(
           (response) => response.json()
@@ -389,6 +402,7 @@ export default function MapComponent() {
       )}
 
       <Button
+       onClick={handleCentrarUbicacion}
         variant={"outline"}
         className="absolute z-40 top-0 sm:top-32 right-10 w-auto m-5"
       >

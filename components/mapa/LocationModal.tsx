@@ -53,18 +53,7 @@ const LocationModal: React.FC<LocationProps> = ({
     useEffect(() => {
         if (ubicacion) {
             
-            if (map) {
-                //TODO DESCOMENTAR
-                /*
-                map.flyTo({
-                  center: [ubicacion.longitude, ubicacion.latitude], // Coordenadas de la ubicación
-                  zoom: 18, // Nivel de zoom
-                  essential: true, // Indica que la animación es necesaria
-                });
-                */
-              }
               onLocationUpdate(ubicacion);
-          console.log("La ubicación se ha actualizado:", ubicacion);
         }
       }, [ubicacion]);
 
