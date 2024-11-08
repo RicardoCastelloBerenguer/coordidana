@@ -28,8 +28,9 @@ export default function MapComponent() {
   const [openPopupGaraje, setOpenPopupGaraje] = useState<boolean>(false);
   const [openPopupPermisos, setOpenPopupPermisos] = useState<boolean>(false);
   const [ubicacion, setUbicacion] = useState<Ubicacion | null>(null);
-
-  const DISTANCIA_LIMITE =50;
+// TODO DESCOMENTAR
+  //const DISTANCIA_LIMITE =50;
+  const DISTANCIA_LIMITE =200;
 
   const ubicacionRef = useRef(ubicacion);
 
@@ -160,6 +161,13 @@ export default function MapComponent() {
             "line-color": ["get", "color"], // Aplica el color de la propiedad 'color'
             "line-width": 12,
           },
+          minzoom: 16,  
+          maxzoom: 24   
+        });
+
+        map.on('zoom', () => {
+          const zoomLevel = map.getZoom();
+          console.log(`Nivel de zoom actual: ${zoomLevel}`);
         });
         
         //PARKING
@@ -200,25 +208,29 @@ export default function MapComponent() {
 
       map.on("click", "streets-layer", async (e) => {
         //TODO DESCOMENTAR
-        //if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
+        if(ubicacionRef && ubicacionRef.current){
+          if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
 
-          if (e.features && e.features[0]?.properties) {
-            const props = e.features[0].properties;
-            const info = {
-              id_tramo: props.id_tramo,
-              nombre: props.nombre,
-              comentario: props.comentario,
-            };
-            setStreetInfo({ ...info, lngLat: e.lngLat });
-            setOpenPopup(true);
+            if (e.features && e.features[0]?.properties) {
+              const props = e.features[0].properties;
+              const info = {
+                id_tramo: props.id_tramo,
+                nombre: props.nombre,
+                comentario: props.comentario,
+              };
+              setStreetInfo({ ...info, lngLat: e.lngLat });
+              setOpenPopup(true);
+            }
           }
-        /*} else {
-          //SI NO ESTA SE SOLICITA OTRA VEZ
-        }*/
+        } else {
+          setOpenPopupPermisos(true);
+        }
       });
 
       
       map.on("click", "garajes-layer", async (e) => {
+       //TODO DESCOMENTAR
+       if(ubicacionRef && ubicacionRef.current){
         if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
 
           if (e.features && e.features[0]?.properties ) {
@@ -249,8 +261,8 @@ export default function MapComponent() {
             setGarajeInfo({ ...info, lngLat: e.lngLat });
             setOpenPopupGaraje(true);
           }
-        } else {
-          //SI NO ESTA SE SOLICITA OTRA VEZ
+        }} else {
+          setOpenPopupPermisos(true);
         }
       });
 
