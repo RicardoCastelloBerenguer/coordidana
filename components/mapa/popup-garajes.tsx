@@ -46,11 +46,11 @@ const PopupGaraje: React.FC<PopupProps> = ({
   setOpenPopup,
   open,
   map,
-  updateMapa
+  updateMapa,
 }) => {
   const [estado, setEstado] = useState(0);
   const [comentario, setComentario] = useState("");
-  
+
   const handleEstadoChange = (e: any) => {
     setEstado(Number(e));
   };
@@ -63,8 +63,8 @@ const PopupGaraje: React.FC<PopupProps> = ({
 
   useEffect(() => {
     if (garajeInfo) {
-      setEstado(garajeInfo.estado || 0); 
-      setComentario(garajeInfo.comentario || ''); 
+      setEstado(garajeInfo.estado || 0);
+      setComentario(garajeInfo.comentario || "");
     }
   }, [garajeInfo]);
 
@@ -75,12 +75,12 @@ const PopupGaraje: React.FC<PopupProps> = ({
       codigo: garajeInfo!.codigo,
       comentario: comentario,
       estado: estado,
-      idUsuario: 123
+      idUsuario: 123,
     };
 
     try {
       const response = await fetch(
-        `http://localhost:4000/garaje`,
+        `${process.env.NEXT_PUBLIC_API_URL}/garaje`,
         {
           method: "POST",
           headers: {
@@ -96,15 +96,12 @@ const PopupGaraje: React.FC<PopupProps> = ({
       if (!response.ok) {
         throw new Error(data.message || "Error al guardar el reporte");
       }
-     
-      
-      updateMapa( garajeInfo!.codigo, estado );
+
+      updateMapa(garajeInfo!.codigo, estado);
       emptyForm();
-      
     } catch (error) {
       console.error("Error en la solicitud:", error);
     }
-    
   };
 
   return (
