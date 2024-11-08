@@ -97,7 +97,7 @@ const LocationModal: React.FC<LocationProps> = ({
           <DialogHeader>
             <DialogTitle>Necesitamos tu ubicación</DialogTitle>
             <DialogDescription>
-              Para posicionarte en el mapa necesitamos que nos des acceso a tu ubicación.
+              Para contribuir aportando datos necesitamos que nos des acceso a tu ubicación.
             </DialogDescription>
           </DialogHeader>
           <div >
