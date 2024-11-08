@@ -75,7 +75,7 @@ const PopupGaraje: React.FC<PopupProps> = ({
       codigo: garajeInfo!.codigo,
       comentario: comentario,
       estado: estado,
-      idUsuario: 1
+      idUsuario: 123
     };
 
     try {

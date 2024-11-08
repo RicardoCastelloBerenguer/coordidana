@@ -17,12 +17,14 @@ export default function MapComponent() {
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [streetInfo, setStreetInfo] = useState<any>(null);
   const [garajeInfo, setGarajeInfo] = useState<any>(null);
+  const [openPopupGaraje, setOpenPopupGaraje] = useState<boolean>(false);
 
 
   function updateStreetColorInMap(row: any) {
     const source = map.getSource("streets");
        // Buscar la calle específica por su ID
     
+       const geojsonData = source._data;
     geojsonData.features.forEach((feature: any) => {
       if (feature.properties.id_tramo == row.id_tramo) {
         feature.properties.color = getColorByPrioridad(row.prioridad) || null;
@@ -188,7 +190,7 @@ export default function MapComponent() {
             comentario: data.comentario
           };
           setGarajeInfo({ ...info, lngLat: e.lngLat });
-          setOpenPopup(true);
+          setOpenPopupGaraje(true);
         }
       });
 
@@ -220,6 +222,16 @@ export default function MapComponent() {
   return (
     <>
       <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />
+      
+      {garajeInfo && (
+        <PopupGaraje
+          garajeInfo={garajeInfo}
+          setOpenPopup={setOpenPopupGaraje}
+          open={openPopupGaraje}
+          map={map}
+          updateMapa ={updateGarajeColorInMap}
+        />
+      )}
       {streetInfo && (
         <Popup
           streetInfo={streetInfo}
@@ -227,15 +239,6 @@ export default function MapComponent() {
           open={openPopup}
           map={map}
           updateMapa={updateStreetColorInMap}
-        />
-      )}
-      {garajeInfo && (
-        <PopupGaraje
-          garajeInfo={garajeInfo}
-          setOpenPopup={setOpenPopup}
-          open={openPopup}
-          map={map}
-          updateMapa ={updateGarajeColorInMap}
         />
       )}
       {/* <Popup streetInfo={streetInfo} map={map} /> */}
