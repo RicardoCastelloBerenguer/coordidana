@@ -49,6 +49,7 @@ const Popup: React.FC<PopupProps> = ({
   updateMapa,
 }) => {
   const [isNoTransitable, setIsNoTransitable] = useState(false);
+  const [isLimpia, setIsLimpia] = useState(false);
   const [isHayVehiculos, setIsHayVehiculos] = useState(false);
   const [isEscombros, setIsEscombros] = useState(false);
   const [comentario, setComentario] = useState("");
@@ -123,12 +124,30 @@ const Popup: React.FC<PopupProps> = ({
           <form onSubmit={manejarGuardadoCarretera}>
             <div className="grid gap-4 py-4">
               <div className="flex w-full gap-5">
+                <Label htmlFor="limpio">Limpia</Label>
+                <Checkbox
+                  id="limpio"
+                  checked={isLimpia}
+                  onCheckedChange={(checked: any) => {
+                    setIsLimpia(checked);
+                    if(checked){
+                      setIsNoTransitable(false);
+                      setIsHayVehiculos(false);
+                      setIsEscombros(false);
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex w-full gap-5">
                 <Label htmlFor="noTransitable">No transitable</Label>
                 <Checkbox
                   id="noTransitable"
                   checked={isNoTransitable}
                   onCheckedChange={(checked: any) => {
                     setIsNoTransitable(checked);
+                    if(checked){
+                      setIsLimpia(false);
+                    }
                   }}
                 />
               </div>
@@ -140,17 +159,23 @@ const Popup: React.FC<PopupProps> = ({
                   checked={isHayVehiculos}
                   onCheckedChange={(checked: any) => {
                     setIsHayVehiculos(checked);
+                    if(checked){
+                      setIsLimpia(false);
+                    }
                   }}
                 />
               </div>
 
               <div className="flex w-full gap-5">
-                <Label htmlFor="escombros">Escombros</Label>
+                <Label htmlFor="escombros">Hay escombros</Label>
                 <Checkbox
                   id="escombros"
                   checked={isEscombros}
                   onCheckedChange={(checked: any) => {
                     setIsEscombros(checked);
+                    if(checked){
+                      setIsLimpia(false);
+                    }
                   }}
                 />
               </div>
