@@ -120,7 +120,7 @@ const PopupGaraje: React.FC<PopupProps> = ({
           <form onSubmit={manejarGuardadoGaraje}>
             <div className="grid gap-4 py-4">
               <div className="flex w-full gap-5">
-                <Label htmlFor="estadoCorrecto">Correcto</Label>
+                <Label htmlFor="estadoCorrecto">Limpio</Label>
                 <Checkbox
                   id="estadoCorrecto"
                   checked={estado == 1}

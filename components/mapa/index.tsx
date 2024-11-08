@@ -54,7 +54,7 @@ export default function MapComponent() {
   function getColorByPrioridad(prioridad: number) {
     switch (prioridad) {
       case 0:
-        return "rgba(61, 216, 114, 0)";
+        return "rgba(210, 210, 220, 0.3)";
       case 1:
         return "rgba(61, 216, 114, 0.7)";
       case 2:
