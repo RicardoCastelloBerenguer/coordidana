@@ -28,7 +28,7 @@ export default function MapComponent() {
   const [openPopupGaraje, setOpenPopupGaraje] = useState<boolean>(false);
   const [openPopupPermisos, setOpenPopupPermisos] = useState<boolean>(false);
   const [ubicacion, setUbicacion] = useState<Ubicacion | null>(null);
-// TODO DESCOMENTAR
+  // TODO DESCOMENTAR
   //const DISTANCIA_LIMITE =50;
   const DISTANCIA_LIMITE =200;
 
@@ -43,17 +43,29 @@ export default function MapComponent() {
   }, [ubicacion]);
 
   function updateStreetColorInMap(row: any) {
-    const source = map.getSource("streets");
+    const source = map.getSource("streets-colors");
        // Buscar la calle específica por su ID
-       const geojsonData = source._data;
-    geojsonData.features.forEach((feature: any) => {
-      if (feature.properties.id_tramo == row.id_tramo) {
-        feature.properties.color = getColorByPrioridad(row.prioridad) || null;
-        // Actualizar la fuente de datos del mapa con el nuevo GeoJSON
-        source.setData(geojsonData);
+    const geojsonData = source._data;
+
+
+    const nuevaFeature: {
+      type: "Feature",
+      geometry: { type: string, coordinates: any[] },
+      properties: { [key: string]: any }
+    } = {
+      type: "Feature",
+      geometry: streetInfo.geometry, 
+      properties: {
+        "id_tramo": streetInfo.id_tramo, 
+        "nombre": streetInfo.nombre,
+        "color": getColorByPrioridad(row.prioridad) || 0
       }
-    });
+    };
+
+    geojsonData.features.push(nuevaFeature);
+    source.setData(geojsonData);
   }
+
   function updateGarajeColorInMap(codigo: any, estado: any) {
     const source = map.getSource("garajes");
 
@@ -136,17 +148,46 @@ export default function MapComponent() {
         // Hacer una única llamada para obtener todos los colores de las calles
         const colorsResponse = await fetch("http://localhost:4000/prioridades");
         const colorsData = await colorsResponse.json();
+
+        const callesGuardadasGeojson: {
+          type: "FeatureCollection",
+          features: { 
+            type: "Feature", 
+            geometry: { type: string, coordinates: any[] }, 
+            properties: { [key: string]: any } 
+          }[]
+        } = {
+          type: "FeatureCollection",
+          features: []
+        };
         
         // Iterar sobre las características del GeoJSON y asignar el color de la base de datos
         geojsonData.features.forEach((feature: any) => {
           const streetId = feature.properties.id_tramo; // Asegúrate de que cada característica tenga un ID único
           // Asignar el color basado en los datos obtenidos
           if (colorsData[streetId] != undefined) {
-            feature.properties.color =
-              getColorByPrioridad(colorsData[streetId].prioridad) || 0;
-            feature.properties.id = colorsData[streetId].id || null;
-          } else feature.properties.color = getColorByPrioridad(0);
+
+            const nuevaFeature: {
+              type: "Feature",
+              geometry: { type: string, coordinates: any[] },
+              properties: { [key: string]: any }
+            } = {
+              type: "Feature",
+              geometry: feature.geometry, 
+              properties: {
+                "id_tramo": feature.properties.id_tramo, 
+                "nombre": feature.properties.nombre,
+                "color": getColorByPrioridad(colorsData[streetId].prioridad) || 0,
+                "id": colorsData[streetId].id || null
+              }
+            };
+
+            callesGuardadasGeojson.features.push(nuevaFeature);
+          } 
+          feature.properties.color = getColorByPrioridad(0);
         });
+
+        //CAPA DE SELECCION DE CALLES
         map.addSource("streets", {
           type: "geojson",
           data: geojsonData,
@@ -164,6 +205,23 @@ export default function MapComponent() {
           minzoom: 16,  
           maxzoom: 24   
         });
+
+        map.addSource("streets-colors", {
+          type: "geojson",
+          data: callesGuardadasGeojson as GeoJSON.FeatureCollection<GeoJSON.Geometry>
+        });
+
+        // Añadir la capa de las calles
+        map.addLayer({
+          id: "streets-colors-layer",
+          type: "line",
+          source: "streets-colors",
+          paint: {
+            "line-color": ["get", "color"], // Aplica el color de la propiedad 'color'
+            "line-width": 6,
+          } 
+        });
+
 
         map.on('zoom', () => {
           const zoomLevel = map.getZoom();
@@ -217,6 +275,7 @@ export default function MapComponent() {
                 id_tramo: props.id_tramo,
                 nombre: props.nombre,
                 comentario: props.comentario,
+                geometry: e.features[0].geometry
               };
               setStreetInfo({ ...info, lngLat: e.lngLat });
               setOpenPopup(true);
