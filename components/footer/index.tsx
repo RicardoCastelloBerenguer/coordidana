@@ -14,7 +14,7 @@ const Footer = () => {
       >
         Política de privacidad
       </Link>
-      <span className="text-zinc-400">© 2024 Emergency CV</span>
+      <span className="text-zinc-400"></span>
     </footer>
   );
 };
