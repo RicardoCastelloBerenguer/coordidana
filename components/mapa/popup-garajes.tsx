@@ -75,7 +75,7 @@ const PopupGaraje: React.FC<PopupProps> = ({
       codigo: garajeInfo!.codigo,
       comentario: comentario,
       estado: estado,
-      idUsuario: 123,
+      idUsuario: localStorage.getItem("currentUser"),
     };
 
     try {

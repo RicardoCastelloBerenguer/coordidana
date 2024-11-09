@@ -173,7 +173,7 @@ export default function MapComponent() {
 
         // Hacer una única llamada para obtener todos los colores de las calles
         const colorsResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/prioridades`
+          `http://localhost:4000/prioridades`
         );
         const colorsData = await colorsResponse.json();
 
@@ -260,7 +260,7 @@ export default function MapComponent() {
         );
 
         const coloresGarajesResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/colores-garajes`
+          `http://localhost:4000/colores-garajes`
         );
         const coloresGarajes = await coloresGarajesResponse.json();
 
@@ -292,19 +292,16 @@ export default function MapComponent() {
 
       setMap(map);
     map.on("click", "streets-layer", async (e) => {
+      if (!isLoggedIn) {
+        console.log("user not logged when clicking");
+        toast({
+          title: "Necesitas estar loggeado para hacer reportes",
+          variant: "destructive",
+        });
+      } else {
         if(ubicacionRef && ubicacionRef.current){
           if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
-
-
-        if (ubicacionRef && ubicacionRef.current) {
-          if (
-            haversine(
-              ubicacionRef.current!.latitude,
-              ubicacionRef.current!.longitude,
-              e.lngLat.lat,
-              e.lngLat.lng
-            ) < DISTANCIA_LIMITE
-          ) {
+            
             if (e.features && e.features[0]?.properties) {
               const props = e.features[0].properties;
               const info = {
@@ -318,20 +315,20 @@ export default function MapComponent() {
             }
           }
         } else {
-          if (!isLoggedIn) {
-            console.log("user not logged when clicking");
-            toast({
-              title: "Necesitas estar loggeado para hacer reportes",
-              variant: "destructive",
-            });
-          } else {
             setOpenPopupPermisos(true);
-          }
         }
+      }
       });
 
       map.on("click", "garajes-layer", async (e) => {
         //TODO DESCOMENTAR
+        if (!isLoggedIn) {
+          console.log("user not logged when clicking");
+          toast({
+            title: "Necesitas estar loggeado para hacer reportes",
+            variant: "destructive",
+          });
+        } else {
         if (ubicacionRef && ubicacionRef.current) {
           if (
             haversine(
@@ -345,7 +342,7 @@ export default function MapComponent() {
               const props = e.features[0].properties;
 
               const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/garaje/${props.ID}`,
+                `http://localhost:4000/garaje/${props.ID}`,
                 {
                   method: "GET",
                   headers: {
@@ -373,6 +370,7 @@ export default function MapComponent() {
         } else {
           setOpenPopupPermisos(true);
         }
+      }
       });
 
       // Cambia el cursor a "pointer" cuando pase sobre una calle

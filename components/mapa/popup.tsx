@@ -28,6 +28,7 @@ import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import getPrioridad from "@/lib/getPrioridad";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/app/contexts/UserContext";
 
 interface PopupProps {
   open: boolean;
@@ -55,6 +56,8 @@ const Popup: React.FC<PopupProps> = ({
   const [isEscombros, setIsEscombros] = useState(false);
   const [comentario, setComentario] = useState("");
   const { toast } = useToast();
+  
+  const { isLoggedIn } = useUser();
   const emptyForm = () => {
     setComentario("");
     setIsEscombros(false);
@@ -65,7 +68,6 @@ const Popup: React.FC<PopupProps> = ({
 
   const manejarGuardadoCarretera = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const reporte = {
       id_tramo: streetInfo!.id_tramo,
       nombre: streetInfo!.nombre,
@@ -73,13 +75,13 @@ const Popup: React.FC<PopupProps> = ({
       transitable: !isNoTransitable,
       coches: isHayVehiculos,
       escombros: isEscombros,
-      idUsuario: 123,
+      idUsuario: localStorage.getItem("currentUser"),
       prioridad: getPrioridad(isNoTransitable, isHayVehiculos, isEscombros),
     };
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/reportes/${streetInfo!.id_tramo}`,
+        `http://localhost:4000/reportes/${streetInfo!.id_tramo}`,
         {
           method: "POST",
           headers: {

@@ -62,7 +62,6 @@ const LocationModal: React.FC<LocationProps> = ({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           });
-
           setOpenPopup(false);
         },
         (error) => {
