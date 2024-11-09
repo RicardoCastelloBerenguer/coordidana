@@ -20,6 +20,8 @@ interface UserType {
   login: (userData: any) => void; // Cambia esto para aceptar un argumento
   isLoggedIn: boolean;
   isLoading: boolean;
+  location: {};
+  saveLocationLocalStorage: (location: { lat: number; lng: number }) => void;
 }
 
 const defaultUser: User = {
@@ -34,7 +36,9 @@ const defaultValue: UserType = {
   logout: () => {},
   login: () => {},
   isLoggedIn: false,
+  location: {},
   isLoading: false,
+  saveLocationLocalStorage: () => {},
 };
 
 const UserContext = createContext<UserType | undefined>(defaultValue);
@@ -43,12 +47,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>(defaultUser);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [location, setLocation] = useState({});
 
   useEffect(() => {
+    setIsLoading(true);
     if (!isLoggedIn) {
       checkIsLoggedIn();
+      checkLocation();
     }
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    console.log("useEffect location");
+    if (Object.keys(location).length === 0) {
+      console.log("checklocation");
+      checkLocation();
+    }
+  }, [location]);
 
   const checkIsLoggedIn = () => {
     setIsLoading(true);
@@ -62,6 +77,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setUser(defaultUser);
       setIsLoading(false);
     }
+  };
+
+  const checkLocation = async () => {
+    setIsLoading(true);
+    const locationCache = await localStorage.getItem("location");
+    if (locationCache) {
+      setLocation(JSON.parse(locationCache));
+    } else {
+      setLocation({}); // o manejar cuando no haya ubicación almacenada
+    }
+    setIsLoading(false);
   };
 
   const login = (userData: User) => {
@@ -83,6 +109,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     window.location.reload();
   };
 
+  const saveLocationLocalStorage = (location: { lat: number; lng: number }) => {
+    localStorage.setItem("location", JSON.stringify(location));
+    setLocation(location);
+  };
+
+  const updateLocationLocalStorage = (location: {
+    lat: number;
+    lng: number;
+  }) => {
+    localStorage.setItem("location", JSON.stringify(location));
+  };
+
   const contextValue: UserType = {
     user,
     setUser,
@@ -91,6 +129,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     isLoggedIn,
     isLoading,
     login,
+    location,
+    saveLocationLocalStorage,
   };
 
   return (

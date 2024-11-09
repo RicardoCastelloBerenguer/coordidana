@@ -26,6 +26,7 @@ import maplibregl from "maplibre-gl";
 import { createPortal } from "react-dom";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
+import { useUser } from "@/app/contexts/UserContext";
 
 interface PopupProps {
   open: boolean;
@@ -51,6 +52,8 @@ const PopupGaraje: React.FC<PopupProps> = ({
   const [estado, setEstado] = useState(0);
   const [comentario, setComentario] = useState("");
 
+  const {user} = useUser();
+
   const handleEstadoChange = (e: any) => {
     setEstado(Number(e));
   };
@@ -75,7 +78,7 @@ const PopupGaraje: React.FC<PopupProps> = ({
       codigo: garajeInfo!.codigo,
       comentario: comentario,
       estado: estado,
-      idUsuario: localStorage.getItem("currentUser"),
+      idUsuario: user,
     };
 
     try {

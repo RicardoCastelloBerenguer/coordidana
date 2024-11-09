@@ -56,7 +56,8 @@ const Popup: React.FC<PopupProps> = ({
   const [isEscombros, setIsEscombros] = useState(false);
   const [comentario, setComentario] = useState("");
   const { toast } = useToast();
-  
+  const { user } = useUser();
+
   const { isLoggedIn } = useUser();
   const emptyForm = () => {
     setComentario("");
@@ -75,7 +76,7 @@ const Popup: React.FC<PopupProps> = ({
       transitable: !isNoTransitable,
       coches: isHayVehiculos,
       escombros: isEscombros,
-      idUsuario: localStorage.getItem("currentUser"),
+      idUsuario: user,
       prioridad: getPrioridad(isNoTransitable, isHayVehiculos, isEscombros),
     };
 

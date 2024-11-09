@@ -32,11 +32,13 @@ export default function MapComponent() {
   const [garajeInfo, setGarajeInfo] = useState<any>(null);
   const [openPopupGaraje, setOpenPopupGaraje] = useState<boolean>(false);
   const [openPopupPermisos, setOpenPopupPermisos] = useState<boolean>(false);
-  const [ubicacion, setUbicacion] = useState<Ubicacion | null>(null);
+  const [ubicacion, setUbicacion] = useState<any | null>(null);
 
   const { toast } = useToast();
 
-  const { isLoggedIn } = useUser();
+  const { isLoggedIn, location } = useUser();
+
+  const { saveLocationLocalStorage } = useUser();
 
   // TODO DESCOMENTAR
   //const DISTANCIA_LIMITE =50;
@@ -46,6 +48,7 @@ export default function MapComponent() {
 
   const handleUbicacionUpdate = (newUbicacion: any) => {
     setUbicacion(newUbicacion); // Actualiza el estado de location
+    saveLocationLocalStorage(newUbicacion);
   };
 
   const handleCentrarUbicacion = () => {
@@ -150,6 +153,13 @@ export default function MapComponent() {
 
     return distance; // Devuelve la distancia en kilómetros
   }
+
+  useEffect(() => {
+    if (Object.keys(location).length > 0) {
+      setUbicacion(location);
+      console.log(location);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && mapContainer.current) {
@@ -291,33 +301,40 @@ export default function MapComponent() {
       });
 
       setMap(map);
-    map.on("click", "streets-layer", async (e) => {
-      if (!isLoggedIn) {
-        console.log("user not logged when clicking");
-        toast({
-          title: "Necesitas estar loggeado para hacer reportes",
-          variant: "destructive",
-        });
-      } else {
-        if(ubicacionRef && ubicacionRef.current){
-          if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
-            
-            if (e.features && e.features[0]?.properties) {
-              const props = e.features[0].properties;
-              const info = {
-                id_tramo: props.id_tramo,
-                nombre: props.nombre,
-                comentario: props.comentario,
-                geometry: e.features[0].geometry,
-              };
-              setStreetInfo({ ...info, lngLat: e.lngLat });
-              setOpenPopup(true);
-            }
-          }
+      map.on("click", "streets-layer", async (e) => {
+        console.log(ubicacion);
+        if (!isLoggedIn) {
+          console.log("user not logged when clicking");
+          toast({
+            title: "Necesitas estar loggeado para hacer reportes",
+            variant: "destructive",
+          });
         } else {
+          if (ubicacionRef && ubicacionRef.current) {
+            if (
+              haversine(
+                ubicacionRef.current!.latitude,
+                ubicacionRef.current!.longitude,
+                e.lngLat.lat,
+                e.lngLat.lng
+              ) < DISTANCIA_LIMITE
+            ) {
+              if (e.features && e.features[0]?.properties) {
+                const props = e.features[0].properties;
+                const info = {
+                  id_tramo: props.id_tramo,
+                  nombre: props.nombre,
+                  comentario: props.comentario,
+                  geometry: e.features[0].geometry,
+                };
+                setStreetInfo({ ...info, lngLat: e.lngLat });
+                setOpenPopup(true);
+              }
+            }
+          } else {
             setOpenPopupPermisos(true);
+          }
         }
-      }
       });
 
       map.on("click", "garajes-layer", async (e) => {
@@ -329,48 +346,50 @@ export default function MapComponent() {
             variant: "destructive",
           });
         } else {
-        if (ubicacionRef && ubicacionRef.current) {
-          if (
-            haversine(
-              ubicacionRef.current!.latitude,
-              ubicacionRef.current!.longitude,
-              e.lngLat.lat,
-              e.lngLat.lng
-            ) < DISTANCIA_LIMITE
-          ) {
-            if (e.features && e.features[0]?.properties) {
-              const props = e.features[0].properties;
+          if (ubicacionRef && ubicacionRef.current) {
+            if (
+              haversine(
+                ubicacionRef.current!.latitude,
+                ubicacionRef.current!.longitude,
+                e.lngLat.lat,
+                e.lngLat.lng
+              ) < DISTANCIA_LIMITE
+            ) {
+              if (e.features && e.features[0]?.properties) {
+                const props = e.features[0].properties;
 
-              const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/garaje/${props.ID}`,
-                {
-                  method: "GET",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
+                const response = await fetch(
+                  `${process.env.NEXT_PUBLIC_API_URL}/garaje/${props.ID}`,
+                  {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  }
+                );
+
+                const data = await response.json();
+                console.log("Respuesta del servidor:", data);
+
+                if (!response.ok) {
+                  throw new Error(
+                    data.message || "Error al recuperar el garaje"
+                  );
                 }
-              );
 
-              const data = await response.json();
-              console.log("Respuesta del servidor:", data);
-
-              if (!response.ok) {
-                throw new Error(data.message || "Error al recuperar el garaje");
+                const info = {
+                  codigo: props.ID,
+                  estado: data.estado,
+                  comentario: data.comentario,
+                };
+                setGarajeInfo({ ...info, lngLat: e.lngLat });
+                setOpenPopupGaraje(true);
               }
-
-              const info = {
-                codigo: props.ID,
-                estado: data.estado,
-                comentario: data.comentario,
-              };
-              setGarajeInfo({ ...info, lngLat: e.lngLat });
-              setOpenPopupGaraje(true);
             }
+          } else {
+            setOpenPopupPermisos(true);
           }
-        } else {
-          setOpenPopupPermisos(true);
         }
-      }
       });
 
       // Cambia el cursor a "pointer" cuando pase sobre una calle
