@@ -66,7 +66,7 @@ const Popup: React.FC<PopupProps> = ({
     setIsHayVehiculos(false);
     setOpenPopup(false);
   };
-
+ 
   const manejarGuardadoCarretera = async (e: React.FormEvent) => {
     e.preventDefault();
     const reporte = {
