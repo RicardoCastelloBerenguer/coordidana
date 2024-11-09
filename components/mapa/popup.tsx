@@ -102,7 +102,6 @@ const Popup: React.FC<PopupProps> = ({
         });
         // throw new Error(data.message || "Error al guardar el reporte");
       } else {
-        console.log("first");
         toast({
           title: "Reporte guardado correctamente",
         });

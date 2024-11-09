@@ -55,7 +55,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (!isLoggedIn) {
       checkIsLoggedIn();
     }
-    console.log("second");
   }, [isLoggedIn]);
 
   useEffect(() => {
@@ -91,7 +90,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const login = (userData: User) => {
-    console.log(userData);
     setIsLoading(true);
     localStorage.setItem("currentUser", JSON.stringify(userData));
     setUser(userData);
