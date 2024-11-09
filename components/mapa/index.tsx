@@ -49,11 +49,18 @@ export default function MapComponent() {
   };
 
   const handleCentrarUbicacion = () => {
-    map.flyTo({
-      center: [ubicacionRef.current!.longitude, ubicacionRef.current!.latitude], // Coordenadas de la ubicación
-      zoom: 18, // Nivel de zoom
-      essential: true, // Indica que la animación es necesaria
-    });
+    if (!ubicacion) {
+      setOpenPopupPermisos(true);
+    } else {
+      map.flyTo({
+        center: [
+          ubicacionRef.current!.longitude,
+          ubicacionRef.current!.latitude,
+        ], // Coordenadas de la ubicación
+        zoom: 18, // Nivel de zoom
+        essential: true, // Indica que la animación es necesaria
+      });
+    }
   };
 
   useEffect(() => {
