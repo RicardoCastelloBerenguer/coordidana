@@ -35,7 +35,8 @@ export default function MapComponent() {
   const [openPopupGaraje, setOpenPopupGaraje] = useState<boolean>(false);
   const [openPopupPermisos, setOpenPopupPermisos] = useState<boolean>(false);
   const [ubicacion, setUbicacion] = useState<any | null>(null);
-
+  const [marcadorAnterior, setMarcadorAnterior] =
+    useState<maplibregl.Marker | null>(null);
   const { toast } = useToast();
 
   const { isLoggedIn, location } = useUser();
@@ -70,12 +71,21 @@ export default function MapComponent() {
           essential: true, // Indica que la animación es necesaria
         });
 
-        const marker = new maplibre.Marker()
-          .setLngLat([location.longitude, location.latitude]) // Coordenadas del marcador
-          .addTo(map); // Añadir el marcador al mapa
+        map.flyTo({
+          center: [location.longitude, location.latitude], // Coordenadas de la ubicación
+          zoom: 18, // Nivel de zoom
+          essential: true, // Indica que la animación es necesaria
+        });
 
-        // Si deseas, puedes agregar un popup al marcador
-        // marker.setPopup(new maplibre.Popup().setHTML("Ubicación actual"));
+        if (marcadorAnterior) {
+          marcadorAnterior.remove();
+        }
+
+        setMarcadorAnterior(
+          new maplibre.Marker()
+            .setLngLat([location.longitude, location.latitude])
+            .addTo(map)
+        );
       } catch (error: any) {
         console.error("Error capturado:", error.message);
       }
