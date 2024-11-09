@@ -173,7 +173,7 @@ export default function MapComponent() {
 
         // Hacer una única llamada para obtener todos los colores de las calles
         const colorsResponse = await fetch(
-          `http://localhost:4000/prioridades`
+          `${process.env.NEXT_PUBLIC_API_URL}/prioridades`
         );
         const colorsData = await colorsResponse.json();
 
@@ -260,7 +260,7 @@ export default function MapComponent() {
         );
 
         const coloresGarajesResponse = await fetch(
-          `http://localhost:4000/colores-garajes`
+          `${process.env.NEXT_PUBLIC_API_URL}/colores-garajes`
         );
         const coloresGarajes = await coloresGarajesResponse.json();
 
@@ -342,7 +342,7 @@ export default function MapComponent() {
               const props = e.features[0].properties;
 
               const response = await fetch(
-                `http://localhost:4000/garaje/${props.ID}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/garaje/${props.ID}`,
                 {
                   method: "GET",
                   headers: {

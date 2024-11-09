@@ -81,7 +81,7 @@ const Popup: React.FC<PopupProps> = ({
 
     try {
       const response = await fetch(
-        `http://localhost:4000/reportes/${streetInfo!.id_tramo}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/reportes/${streetInfo!.id_tramo}`,
         {
           method: "POST",
           headers: {
