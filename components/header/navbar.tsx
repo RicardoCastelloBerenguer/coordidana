@@ -3,6 +3,7 @@ import React from "react";
 import { Button, buttonVariants } from "../ui/button";
 import Image from "next/image";
 import AuthMenu from "../auth-menu";
+import { useUser } from "@/app/contexts/UserContext";
 
 const Navbar = ({
   className,
@@ -16,6 +17,8 @@ const Navbar = ({
       setOpen(false);
     }
   };
+
+  const { isLoggedIn, logout } = useUser();
 
   return (
     <ul
@@ -52,9 +55,15 @@ const Navbar = ({
       </li>
 
       <li>
-        <AuthMenu>
-          <Button variant={"outline"}>Iniciar Sesión</Button>
-        </AuthMenu>
+        {!isLoggedIn ? (
+          <AuthMenu>
+            <Button variant={"outline"}>Iniciar Sesión</Button>
+          </AuthMenu>
+        ) : (
+          <Button onClick={logout} variant={"destructive"}>
+            Cerrar Sesión
+          </Button>
+        )}
       </li>
     </ul>
   );

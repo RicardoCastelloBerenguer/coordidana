@@ -14,6 +14,8 @@ import { features } from "process";
 import LocationModal from "./LocationModal";
 import { Button } from "../ui/button";
 import { LoaderCircle, LocateFixed } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/app/contexts/UserContext";
 
 interface Ubicacion {
   latitude: number;
@@ -32,9 +34,13 @@ export default function MapComponent() {
   const [openPopupPermisos, setOpenPopupPermisos] = useState<boolean>(false);
   const [ubicacion, setUbicacion] = useState<Ubicacion | null>(null);
 
+  const { toast } = useToast();
+
+  const { isLoggedIn } = useUser();
+
   // TODO DESCOMENTAR
   //const DISTANCIA_LIMITE =50;
-  const DISTANCIA_LIMITE =200;
+  const DISTANCIA_LIMITE = 200;
 
   const ubicacionRef = useRef(ubicacion);
 
@@ -43,15 +49,19 @@ export default function MapComponent() {
   };
 
   const handleCentrarUbicacion = () => {
-    
-                map.flyTo({
-                  center: [ubicacionRef.current!.longitude, ubicacionRef.current!.latitude], // Coordenadas de la ubicación
-                  zoom: 18, // Nivel de zoom
-                  essential: true, // Indica que la animación es necesaria
-                });
-               
+    if (!ubicacion) {
+      setOpenPopupPermisos(true);
+    } else {
+      map.flyTo({
+        center: [
+          ubicacionRef.current!.longitude,
+          ubicacionRef.current!.latitude,
+        ], // Coordenadas de la ubicación
+        zoom: 18, // Nivel de zoom
+        essential: true, // Indica que la animación es necesaria
+      });
+    }
   };
-
 
   useEffect(() => {
     ubicacionRef.current = ubicacion; // Actualiza el ref cuando cambia `ubicacion`
@@ -59,22 +69,21 @@ export default function MapComponent() {
 
   function updateStreetColorInMap(row: any) {
     const source = map.getSource("streets-colors");
-       // Buscar la calle específica por su ID
+    // Buscar la calle específica por su ID
     const geojsonData = source._data;
 
-
     const nuevaFeature: {
-      type: "Feature",
-      geometry: { type: string, coordinates: any[] },
-      properties: { [key: string]: any }
+      type: "Feature";
+      geometry: { type: string; coordinates: any[] };
+      properties: { [key: string]: any };
     } = {
       type: "Feature",
-      geometry: streetInfo.geometry, 
+      geometry: streetInfo.geometry,
       properties: {
-        "id_tramo": streetInfo.id_tramo, 
-        "nombre": streetInfo.nombre,
-        "color": getColorByPrioridad(row.prioridad) || 0
-      }
+        id_tramo: streetInfo.id_tramo,
+        nombre: streetInfo.nombre,
+        color: getColorByPrioridad(row.prioridad) || 0,
+      },
     };
 
     geojsonData.features.push(nuevaFeature);
@@ -154,7 +163,7 @@ export default function MapComponent() {
 
       map.on("load", async () => {
         setOnloading(true);
-        if(!ubicacionRef || !ubicacionRef.current){
+        if (!ubicacionRef || !ubicacionRef.current) {
           setOpenPopupPermisos(true);
         }
         // Cargar el archivo GeoJSON
@@ -169,40 +178,39 @@ export default function MapComponent() {
         const colorsData = await colorsResponse.json();
 
         const callesGuardadasGeojson: {
-          type: "FeatureCollection",
-          features: { 
-            type: "Feature", 
-            geometry: { type: string, coordinates: any[] }, 
-            properties: { [key: string]: any } 
-          }[]
+          type: "FeatureCollection";
+          features: {
+            type: "Feature";
+            geometry: { type: string; coordinates: any[] };
+            properties: { [key: string]: any };
+          }[];
         } = {
           type: "FeatureCollection",
-          features: []
+          features: [],
         };
-        
+
         // Iterar sobre las características del GeoJSON y asignar el color de la base de datos
         geojsonData.features.forEach((feature: any) => {
           const streetId = feature.properties.id_tramo; // Asegúrate de que cada característica tenga un ID único
           // Asignar el color basado en los datos obtenidos
           if (colorsData[streetId] != undefined) {
-
             const nuevaFeature: {
-              type: "Feature",
-              geometry: { type: string, coordinates: any[] },
-              properties: { [key: string]: any }
+              type: "Feature";
+              geometry: { type: string; coordinates: any[] };
+              properties: { [key: string]: any };
             } = {
               type: "Feature",
-              geometry: feature.geometry, 
+              geometry: feature.geometry,
               properties: {
-                "id_tramo": feature.properties.id_tramo, 
-                "nombre": feature.properties.nombre,
-                "color": getColorByPrioridad(colorsData[streetId].prioridad) || 0,
-                "id": colorsData[streetId].id || null
-              }
+                id_tramo: feature.properties.id_tramo,
+                nombre: feature.properties.nombre,
+                color: getColorByPrioridad(colorsData[streetId].prioridad) || 0,
+                id: colorsData[streetId].id || null,
+              },
             };
 
             callesGuardadasGeojson.features.push(nuevaFeature);
-          } 
+          }
           feature.properties.color = getColorByPrioridad(0);
         });
 
@@ -221,13 +229,13 @@ export default function MapComponent() {
             "line-color": ["get", "color"], // Aplica el color de la propiedad 'color'
             "line-width": 12,
           },
-          minzoom: 16,  
-          maxzoom: 24   
+          minzoom: 16,
+          maxzoom: 24,
         });
 
         map.addSource("streets-colors", {
           type: "geojson",
-          data: callesGuardadasGeojson as GeoJSON.FeatureCollection<GeoJSON.Geometry>
+          data: callesGuardadasGeojson as GeoJSON.FeatureCollection<GeoJSON.Geometry>,
         });
 
         // Añadir la capa de las calles
@@ -238,13 +246,11 @@ export default function MapComponent() {
           paint: {
             "line-color": ["get", "color"], // Aplica el color de la propiedad 'color'
             "line-width": 6,
-          } 
+          },
         });
 
-
-        map.on('zoom', () => {
+        map.on("zoom", () => {
           const zoomLevel = map.getZoom();
-          console.log(`Nivel de zoom actual: ${zoomLevel}`);
         });
 
         //PARKING
@@ -285,69 +291,88 @@ export default function MapComponent() {
       });
 
       setMap(map);
-
-    map.on("click", "streets-layer", async (e) => {
+      // console.log("first");
+      map.on("click", "streets-layer", async (e) => {
         //TODO DESCOMENTAR
-        if(ubicacionRef && ubicacionRef.current){
-          if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
 
+        if (ubicacionRef && ubicacionRef.current) {
+          if (
+            haversine(
+              ubicacionRef.current!.latitude,
+              ubicacionRef.current!.longitude,
+              e.lngLat.lat,
+              e.lngLat.lng
+            ) < DISTANCIA_LIMITE
+          ) {
             if (e.features && e.features[0]?.properties) {
               const props = e.features[0].properties;
               const info = {
                 id_tramo: props.id_tramo,
                 nombre: props.nombre,
                 comentario: props.comentario,
-                geometry: e.features[0].geometry
+                geometry: e.features[0].geometry,
               };
               setStreetInfo({ ...info, lngLat: e.lngLat });
               setOpenPopup(true);
             }
           }
         } else {
-          setOpenPopupPermisos(true);
-        }
-      });
-
-      
-      map.on("click", "garajes-layer", async (e) => {
-       //TODO DESCOMENTAR
-       if(ubicacionRef && ubicacionRef.current){
-        if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
-
-          if (e.features && e.features[0]?.properties ) {
-            const props = e.features[0].properties;
-
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/garaje/${props.ID}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-              },
-
-            }
-          );
-
-            const data = await response.json();
-            console.log("Respuesta del servidor:", data);
-      
-            if (!response.ok) {
-              throw new Error(data.message || "Error al recuperar el garaje");
-            }
-
-            const info = {
-              codigo: props.ID,
-              estado: data.estado,
-              comentario: data.comentario
-            };
-            setGarajeInfo({ ...info, lngLat: e.lngLat });
-            setOpenPopupGaraje(true);
+          if (!isLoggedIn) {
+            console.log("user not logged when clicking");
+            toast({
+              title: "Necesitas estar loggeado para hacer reportes",
+              variant: "destructive",
+            });
+          } else {
+            setOpenPopupPermisos(true);
           }
-        }} else {
-          setOpenPopupPermisos(true);
         }
       });
 
+      map.on("click", "garajes-layer", async (e) => {
+        //TODO DESCOMENTAR
+        if (ubicacionRef && ubicacionRef.current) {
+          if (
+            haversine(
+              ubicacionRef.current!.latitude,
+              ubicacionRef.current!.longitude,
+              e.lngLat.lat,
+              e.lngLat.lng
+            ) < DISTANCIA_LIMITE
+          ) {
+            if (e.features && e.features[0]?.properties) {
+              const props = e.features[0].properties;
+
+              const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/garaje/${props.ID}`,
+                {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              const data = await response.json();
+              console.log("Respuesta del servidor:", data);
+
+              if (!response.ok) {
+                throw new Error(data.message || "Error al recuperar el garaje");
+              }
+
+              const info = {
+                codigo: props.ID,
+                estado: data.estado,
+                comentario: data.comentario,
+              };
+              setGarajeInfo({ ...info, lngLat: e.lngLat });
+              setOpenPopupGaraje(true);
+            }
+          }
+        } else {
+          setOpenPopupPermisos(true);
+        }
+      });
 
       // Cambia el cursor a "pointer" cuando pase sobre una calle
       map.on("mouseenter", "streets-layer", () => {
@@ -375,7 +400,7 @@ export default function MapComponent() {
 
   return (
     <>
-      <div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <LocationModal
           setOpenPopup={setOpenPopupPermisos}
           map={map}
@@ -416,7 +441,7 @@ export default function MapComponent() {
       )}
 
       <Button
-       onClick={handleCentrarUbicacion}
+        onClick={handleCentrarUbicacion}
         variant={"outline"}
         className="absolute z-40 top-0 sm:top-32 right-10 w-auto m-5"
       >

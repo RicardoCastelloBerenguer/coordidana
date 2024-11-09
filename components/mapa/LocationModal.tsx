@@ -36,9 +36,9 @@ interface LocationProps {
 }
 
 interface Ubicacion {
-    latitude: number;
-    longitude: number;
-  }
+  latitude: number;
+  longitude: number;
+}
 
 const LocationModal: React.FC<LocationProps> = ({
   setOpenPopup,
@@ -46,56 +46,55 @@ const LocationModal: React.FC<LocationProps> = ({
   open,
   map,
 }) => {
+  const [ubicacion, setUbicacion] = useState<Ubicacion | null>(null);
 
-    const [ubicacion, setUbicacion] = useState<Ubicacion | null>(null);
-    
+  useEffect(() => {
+    if (ubicacion) {
+      onLocationUpdate(ubicacion);
+    }
+  }, [ubicacion]);
 
-    useEffect(() => {
-        if (ubicacion) {
-            
-              onLocationUpdate(ubicacion);
+  const handleGetLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUbicacion({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+
+          setOpenPopup(false);
+        },
+        (error) => {
+          setOpenPopup(false);
+          console.error("Error al obtener ubicación:", error.message);
         }
-      }, [ubicacion]);
-
-    const handleGetLocation = () => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              setUbicacion({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-              });
-              
-              setOpenPopup(false); 
-            },
-            (error) => {
-            setOpenPopup(false); 
-            console.error("Error al obtener ubicación:", error.message);
-            }
-          );
-        } else {
-            setOpenPopup(false); 
-          alert('Geolocalización no soportada por este navegador');
-        }
-      };
+      );
+    } else {
+      setOpenPopup(false);
+      alert("Geolocalización no soportada por este navegador");
+    }
+  };
 
   return (
     <>
       <Dialog onOpenChange={setOpenPopup} open={open}>
-        <DialogContent className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[400px] md:max-w-500px]">
+        <DialogContent className="absolute  left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[400px] md:max-w-500px] top-1/3">
           <DialogHeader>
             <DialogTitle>Necesitamos tu ubicación</DialogTitle>
             <DialogDescription>
-              Para contribuir aportando datos necesitamos que nos des acceso a tu ubicación.
+              Para contribuir aportando datos necesitamos que nos des acceso a
+              tu ubicación.
             </DialogDescription>
           </DialogHeader>
-          <div >
+          <div>
             <div className="grid gap-4 py-4">
-              <div className="flex w-full gap-5">
-              </div>
+              <div className="flex w-full gap-5"></div>
             </div>
             <DialogFooter>
-              <Button onClick={handleGetLocation}>Sí, permitir ubicación</Button>
+              <Button onClick={handleGetLocation}>
+                Sí, permitir ubicación
+              </Button>
             </DialogFooter>
           </div>
         </DialogContent>
