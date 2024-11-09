@@ -31,16 +31,12 @@ export async function fetchAndSaveGeoJson() {
     const savedGarajesGeoJson = await db.garajes.get(1);
 
     if (savedCarreterasGeoJson && savedGarajesGeoJson) {
-      console.log("GeoJSON de carreteras y garajes encontrados en IndexedDB");
       return {
         carreteras: savedCarreterasGeoJson.data,
         garajes: savedGarajesGeoJson.data,
       };
     }
 
-    console.log(
-      "GeoJSON no encontrado en IndexedDB. Realizando fetch de ambos geoJson..."
-    );
 
     const geojsonCarreterasData = await fetch("/carreteras.geojson").then(
       (response) => response.json()
@@ -52,7 +48,6 @@ export async function fetchAndSaveGeoJson() {
     await db.carreteras.put({ id: 1, data: geojsonCarreterasData });
     await db.garajes.put({ id: 1, data: geojsonGarajesData });
 
-    console.log("GeoJSON de carreteras y garajes guardados en IndexedDB");
     return { carreteras: geojsonCarreterasData, garajes: geojsonGarajesData };
   } catch (error) {
     console.error("Error al obtener el GeoJSON:", error);
