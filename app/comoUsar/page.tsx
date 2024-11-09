@@ -21,9 +21,8 @@ const page = () => {
           <Card className="pt-5 mx-2">
             <CardContent>
               <p className="text-base font-medium text-center">
-                A continuación puedes observar un carrusel de imágenes
-                ofreciendo una breve guía de como usar y para que sirve nuestra
-                web coordidana.
+                Guía de uso y objetivo de Coordidana junto con nuestras redes
+                sociales.
               </p>
             </CardContent>
           </Card>

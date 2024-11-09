@@ -79,7 +79,7 @@ const LocationModal: React.FC<LocationProps> = ({
   return (
     <>
       <Dialog onOpenChange={setOpenPopup} open={open}>
-        <DialogContent className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[400px] md:max-w-500px]">
+        <DialogContent className="absolute  left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[400px] md:max-w-500px] top-1/3">
           <DialogHeader>
             <DialogTitle>Necesitamos tu ubicación</DialogTitle>
             <DialogDescription>
