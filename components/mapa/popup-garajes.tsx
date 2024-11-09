@@ -27,6 +27,7 @@ import { createPortal } from "react-dom";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { useUser } from "@/app/contexts/UserContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface PopupProps {
   open: boolean;
@@ -49,30 +50,36 @@ const PopupGaraje: React.FC<PopupProps> = ({
   map,
   updateMapa,
 }) => {
-  const [estado, setEstado] = useState(0);
+  const [estado, setEstado] = useState<number | null>(null);
   const [comentario, setComentario] = useState("");
 
-  const {user} = useUser();
+  const { toast } = useToast();
 
-  const handleEstadoChange = (e: any) => {
-    setEstado(Number(e));
-  };
+  const { user } = useUser();
 
   const emptyForm = () => {
     setComentario("");
-    setEstado(0);
+    setEstado(null);
     setOpenPopup(false);
   };
 
   useEffect(() => {
     if (garajeInfo) {
-      setEstado(garajeInfo.estado || 0);
+      setEstado(garajeInfo.estado || null);
       setComentario(garajeInfo.comentario || "");
     }
   }, [garajeInfo]);
 
   const manejarGuardadoGaraje = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!estado) {
+      toast({
+        title: "Debes incluir un estado para poder guardar el garaje",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const reporte = {
       codigo: garajeInfo!.codigo,
@@ -99,7 +106,10 @@ const PopupGaraje: React.FC<PopupProps> = ({
       if (!response.ok) {
         throw new Error(data.message || "Error al guardar el reporte");
       }
-
+      toast({
+        title: "Reporte guardado correctamente",
+        variant: "default",
+      });
       updateMapa(garajeInfo!.codigo, estado);
       emptyForm();
     } catch (error) {
@@ -125,7 +135,7 @@ const PopupGaraje: React.FC<PopupProps> = ({
                   id="estadoCorrecto"
                   checked={estado == 1}
                   onCheckedChange={(checked: any) => {
-                    handleEstadoChange(1);
+                    setEstado(1);
                   }}
                 />
               </div>
@@ -135,7 +145,7 @@ const PopupGaraje: React.FC<PopupProps> = ({
                   id="estadoBarro"
                   checked={estado == 2}
                   onCheckedChange={(checked: any) => {
-                    handleEstadoChange(2);
+                    setEstado(2);
                   }}
                 />
               </div>
@@ -145,7 +155,7 @@ const PopupGaraje: React.FC<PopupProps> = ({
                   id="estadoInundado"
                   checked={estado == 3}
                   onCheckedChange={(checked: any) => {
-                    handleEstadoChange(3);
+                    setEstado(3);
                   }}
                 />
               </div>
