@@ -18,6 +18,7 @@ import { LoaderCircle, LocateFixed } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/app/contexts/UserContext";
 import handleGetLocation from "@/lib/currentLocation";
+import { fetchAndSaveGeoJson } from "@/lib/indexedDB";
 
 interface Ubicacion {
   latitude: number;
@@ -28,7 +29,8 @@ export default function MapComponent() {
   const mapContainer = useRef(null);
 
   const [map, setMap] = useState<any>(null);
-  const [loading, setOnloading] = useState<boolean>(false);
+  const [loadingData, setOnloadingData] = useState<boolean>(false);
+  const [loadingColores, setOnloadingColores] = useState<boolean>(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [streetInfo, setStreetInfo] = useState<any>(null);
   const [garajeInfo, setGarajeInfo] = useState<any>(null);
@@ -42,6 +44,8 @@ export default function MapComponent() {
   const { isLoggedIn, location } = useUser();
 
   const { saveLocationLocalStorage } = useUser();
+
+  const [geoJsonDataCarreteras, setGeoJsonDataCarreteras] = useState<any>(null);
 
   // TODO DESCOMENTAR
   const DISTANCIA_LIMITE =50;
@@ -198,19 +202,22 @@ export default function MapComponent() {
       });
 
       map.on("load", async () => {
-        setOnloading(true);
-        if (!ubicacionRef || !ubicacionRef.current) {
-          setOpenPopupPermisos(true);
-        }
+        setOnloadingData(true);
+        // if (!ubicacionRef || !ubicacionRef.current) {
+        //   setOpenPopupPermisos(true);
+        // }
         // Cargar el archivo GeoJSON
-        const geojsonData = await fetch("/carreteras.geojson").then(
-          (response) => response.json()
-        );
+        console.time("prueba");
+        const data = await fetchAndSaveGeoJson();
+        console.timeEnd("prueba");
+        const geojsonData = data!.carreteras;
 
         // Hacer una única llamada para obtener todos los colores de las calles
         const colorsResponse = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/prioridades`
         );
+        setOnloadingData(false);
+        setOnloadingColores(true);
         const colorsData = await colorsResponse.json();
 
         const callesGuardadasGeojson: {
@@ -249,7 +256,7 @@ export default function MapComponent() {
           }
           feature.properties.color = getColorByPrioridad(0);
         });
-
+        setOnloadingColores(true);
         //CAPA DE SELECCION DE CALLES
         map.addSource("streets", {
           type: "geojson",
@@ -291,9 +298,7 @@ export default function MapComponent() {
 
         //PARKING
         // Cargar el archivo GeoJSON
-        const geojsonGarajesData = await fetch("/garajes.geojson").then(
-          (response) => response.json()
-        );
+        const geojsonGarajesData = data?.garajes;
 
         const coloresGarajesResponse = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/colores-garajes`
@@ -323,7 +328,16 @@ export default function MapComponent() {
             "fill-color": ["get", "color"],
           },
         });
-        setOnloading(false);
+
+        map.on("sourcedata", function onSourceData(e) {
+          // Comprobar que la fuente correcta se ha cargado y la capa está lista
+          if (e.sourceId === "garajes" && map.isSourceLoaded("garajes")) {
+            // Cambiar el estado de carga
+            setOnloadingColores(false);
+            // Eliminar el listener para que no se ejecute más veces
+            map.off("sourcedata", onSourceData);
+          }
+        });
       });
 
       setMap(map);
@@ -455,7 +469,7 @@ export default function MapComponent() {
 
       <div className="relative w-full h-screen">
         <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />
-        {loading && (
+        {loadingData && (
           <div className="absolute top-14 left-0 right-0 bottom-0 flex justify-center items-center z-50">
             <div className="flex flex-col items-center justify-center gap-2">
               <LoaderCircle className="animate-spin size-20" />
@@ -464,6 +478,15 @@ export default function MapComponent() {
           </div>
         )}
       </div>
+
+      {loadingColores && (
+        <div className="absolute top-16 right-2 flex justify-center items-center z-50">
+          <div className="flex items-center justify-center gap-2 bg-white rounded-lg text-primary p-2">
+            <LoaderCircle className="animate-spin size-15" />
+            <span>Cargando reportes de usuarios...</span>
+          </div>
+        </div>
+      )}
 
       {garajeInfo && (
         <PopupGaraje
