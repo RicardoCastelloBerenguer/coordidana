@@ -77,9 +77,8 @@ export default function MapComponent() {
         if (marcadorAnterior) {
           marcadorAnterior.remove();
         }
-
         setMarcadorAnterior(
-          new maplibre.Marker()
+          new maplibre.Marker({ color: '#7c3aed' })
             .setLngLat([location.longitude, location.latitude])
             .addTo(map)
         );
@@ -477,7 +476,7 @@ export default function MapComponent() {
           },
         });
 
-
+      
         map.on("sourcedata", function onSourceData(e) {
           // Comprobar que la fuente correcta se ha cargado y la capa está lista
           if (e.sourceId === "garajes-colores" && map.isSourceLoaded("garajes-colores")) {
@@ -503,9 +502,7 @@ export default function MapComponent() {
           "fill-color": ["get", "color"],
         },
       });
-        setOnloading(false);
-
-      });
+    })
 
       setMap(map);
       map.on("click", "streets-layer", async (e) => {
