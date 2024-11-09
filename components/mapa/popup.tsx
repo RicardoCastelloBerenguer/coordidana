@@ -149,20 +149,7 @@ const Popup: React.FC<PopupProps> = ({
                   }}
                 />
               </div>
-              <div className="flex w-full gap-5">
-                <Label htmlFor="noTransitable">No transitable</Label>
-                <Checkbox
-                  id="noTransitable"
-                  checked={isNoTransitable}
-                  onCheckedChange={(checked: any) => {
-                    setIsNoTransitable(checked);
-                    if (checked) {
-                      setIsLimpia(false);
-                    }
-                  }}
-                />
-              </div>
-
+              
               <div className="flex w-full gap-5">
                 <Label htmlFor="hayVehiculos">Hay vehículos</Label>
                 <Checkbox
@@ -178,7 +165,7 @@ const Popup: React.FC<PopupProps> = ({
               </div>
 
               <div className="flex w-full gap-5">
-                <Label htmlFor="escombros">Hay escombros</Label>
+                <Label htmlFor="escombros">Hay escombros / barro</Label>
                 <Checkbox
                   id="escombros"
                   checked={isEscombros}
@@ -190,6 +177,20 @@ const Popup: React.FC<PopupProps> = ({
                   }}
                 />
               </div>
+              <div className="flex w-full gap-5">
+                <Label htmlFor="noTransitable">No transitable</Label>
+                <Checkbox
+                  id="noTransitable"
+                  checked={isNoTransitable}
+                  onCheckedChange={(checked: any) => {
+                    setIsNoTransitable(checked);
+                    if (checked) {
+                      setIsLimpia(false);
+                    }
+                  }}
+                />
+              </div>
+
 
               <div className="flex w-full flex-col mt-5 gap-2">
                 <Label htmlFor="comentarios" className="ml-1">

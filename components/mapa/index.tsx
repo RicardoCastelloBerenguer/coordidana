@@ -78,7 +78,7 @@ export default function MapComponent() {
           marcadorAnterior.remove();
         }
         setMarcadorAnterior(
-          new maplibre.Marker({ color: '#7c3aed' })
+          new maplibre.Marker({ color: '#803cec' })
             .setLngLat([location.longitude, location.latitude])
             .addTo(map)
         );

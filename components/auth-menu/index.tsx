@@ -28,6 +28,9 @@ const registerSchema = z.object({
   password: z
     .string()
     .min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
+  privacidad: z.boolean().refine((val) => val === true, {
+      message: 'Debe aceptar la política de privacidad para continuar.',
+    }),
 });
 
 const loginSchema = z.object({
@@ -98,6 +101,7 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
             usuario: dataRegister.username,
             pass: hashedPassword,
             email: dataRegister.email,
+            privacidad: dataRegister.privacidad
           }),
         }
       );
@@ -108,6 +112,7 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
           username: "",
           email: "",
           password: "",
+          privacidad: false
         });
         toast({ title: "Te has registrado correctamente" });
       } else {
@@ -167,7 +172,7 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
           </DialogTitle>
         </DialogHeader>
         {!login ? (
-          <RegisterForm
+          <RegisterForm setOpen={setOpen}
             formType={formRegister}
             onSubmitRegister={onSubmitRegister}
             setLogin={setLogin}
