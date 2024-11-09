@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibre from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Popup from "./popup";
+import { Marker } from "maplibre-gl";
 
 import getPrioridad from "@/lib/getPrioridad";
 
@@ -16,6 +17,7 @@ import { Button } from "../ui/button";
 import { LoaderCircle, LocateFixed } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/app/contexts/UserContext";
+import handleGetLocation from "@/lib/currentLocation";
 
 interface Ubicacion {
   latitude: number;
@@ -51,18 +53,32 @@ export default function MapComponent() {
     saveLocationLocalStorage(newUbicacion);
   };
 
-  const handleCentrarUbicacion = () => {
+  const handleCentrarUbicacion = async () => {
     if (!ubicacion) {
       setOpenPopupPermisos(true);
     } else {
-      map.flyTo({
-        center: [
-          ubicacionRef.current!.longitude,
-          ubicacionRef.current!.latitude,
-        ], // Coordenadas de la ubicación
-        zoom: 18, // Nivel de zoom
-        essential: true, // Indica que la animación es necesaria
-      });
+      try {
+        const location = (await handleGetLocation()) as {
+          latitude: number;
+          longitude: number;
+        };
+        setUbicacion(location);
+        console.log("Ubicación obtenida:", location);
+        map.flyTo({
+          center: [location.longitude, location.latitude], // Coordenadas de la ubicación
+          zoom: 18, // Nivel de zoom
+          essential: true, // Indica que la animación es necesaria
+        });
+
+        const marker = new maplibre.Marker()
+          .setLngLat([location.longitude, location.latitude]) // Coordenadas del marcador
+          .addTo(map); // Añadir el marcador al mapa
+
+        // Si deseas, puedes agregar un popup al marcador
+        // marker.setPopup(new maplibre.Popup().setHTML("Ubicación actual"));
+      } catch (error: any) {
+        console.error("Error capturado:", error.message);
+      }
     }
   };
 
