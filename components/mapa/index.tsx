@@ -44,8 +44,8 @@ export default function MapComponent() {
   const { saveLocationLocalStorage } = useUser();
 
   // TODO DESCOMENTAR
-  //const DISTANCIA_LIMITE =50;
-  const DISTANCIA_LIMITE = 200;
+  const DISTANCIA_LIMITE =50;
+  
 
   const ubicacionRef = useRef(ubicacion);
 
@@ -135,27 +135,49 @@ export default function MapComponent() {
 
   
   const refrescarGarajes = async () =>{
-    const sourceGarajes = map.getSource("garajes");
-    const geojsonGarajesData = sourceGarajes._data;
 
+    try {
+      
+      const sourceColores = map.getSource("garajes-colores");
+      const geojsonColoresData = sourceColores._data;
 
-    const coloresGarajesResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/colores-garajes`
-    );
-    const coloresGarajes = await coloresGarajesResponse.json();
+      
+      const sourceGarajes = map.getSource("garajes");
+      const geojsonGarajesData = sourceGarajes._data;
 
-    geojsonGarajesData.features.forEach((feature: any) => {
-      if (coloresGarajes[feature.properties.ID]) {
-        feature.properties.color = getColorByEstado(
-          coloresGarajes[feature.properties.ID].estado
-        );
-      } else {
-        feature.properties.color = getColorByEstado(0);
-      }
-    });
+      const coloresGarajesResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/colores-garajes`
+      );
+      const coloresGarajes = await coloresGarajesResponse.json();
 
-    
-    sourceGarajes.setData(geojsonGarajesData);
+      geojsonColoresData.features = [];
+      geojsonGarajesData.features.forEach((feature: any) => {
+        const garajeId = feature.properties.ID; 
+        // Asegúrate de que cada característica tenga un ID único
+        // Asignar el color basado en los datos obtenidos
+        if (coloresGarajes[garajeId] != undefined) {
+          const nuevaFeature: {
+            type: "Feature";
+            geometry: { type: string; coordinates: any[] };
+            properties: { [key: string]: any };
+          } = {
+            type: "Feature",
+            geometry: feature.geometry,
+            properties: {
+              color: getColorByEstado(coloresGarajes[garajeId].estado),
+              id: coloresGarajes[garajeId].id || null,
+            },
+          };
+
+          geojsonColoresData.features.push(nuevaFeature);
+        }
+      });
+
+        sourceColores.setData(geojsonColoresData);
+
+    } catch (error: any) {
+      console.error("Error capturado:", error.message);
+    }
   }
 
   const handleRefrescarMapa = async () => {
@@ -186,23 +208,50 @@ export default function MapComponent() {
       },
     };
 
+    let contiene = false;
+    for (let i = 0; i < geojsonData.features.length; i++) {
+      if (geojsonData.features[i].properties.id_tramo === streetInfo.id_tramo) {
+        geojsonData.features[i].properties.color = getColorByPrioridad(row.prioridad);
+        contiene = true;
+      }
+    }
+    if(!contiene){
+      geojsonData.features.push(nuevaFeature);
+    }
+
     geojsonData.features.push(nuevaFeature);
     source.setData(geojsonData);
   }
 
   function updateGarajeColorInMap(codigo: any, estado: any) {
-    const source = map.getSource("garajes");
+    const source = map.getSource("garajes-colores");
 
     // Obtener el GeoJSON de la fuente
     const geojsonData = source._data;
 
-    geojsonData.features.forEach((feature: any) => {
-      if (feature.properties.ID == codigo) {
-        feature.properties.color = getColorByEstado(estado);
-        source.setData(geojsonData);
-        return;
+    const nuevaFeature: {
+      type: "Feature";
+      geometry: { type: string; coordinates: any[] };
+      properties: { [key: string]: any };
+    } = {
+      type: "Feature",
+      geometry: garajeInfo.geometry,
+      properties: {
+        id: codigo,
+        color: getColorByEstado(estado)
+      },
+    };
+    let contiene = false;
+    for (let i = 0; i < geojsonData.features.length; i++) {
+      if (geojsonData.features[i].properties.id === codigo) {
+        geojsonData.features[i].properties.color = getColorByEstado(estado);
+        contiene = true;
       }
-    });
+    }
+    if(!contiene){
+      geojsonData.features.push(nuevaFeature);
+    }
+    source.setData(geojsonData);
   }
 
   function getColorByPrioridad(prioridad: number) {
@@ -220,6 +269,8 @@ export default function MapComponent() {
 
   function getColorByEstado(estado: number) {
     switch (estado) {
+      case -1:
+      return "rgba(46, 41, 78, 0)";
       case 0:
         return "rgba(46, 41, 78, 0.15)";
       case 1:
@@ -370,15 +421,42 @@ export default function MapComponent() {
         );
         const coloresGarajes = await coloresGarajesResponse.json();
 
+        const garajesGuardadosGeojson: {
+          type: "FeatureCollection";
+          features: {
+            type: "Feature";
+            geometry: { type: string; coordinates: any[] };
+            properties: { [key: string]: any };
+          }[];
+        } = {
+          type: "FeatureCollection",
+          features: [],
+        };
+
         geojsonGarajesData.features.forEach((feature: any) => {
-          if (coloresGarajes[feature.properties.ID]) {
-            feature.properties.color = getColorByEstado(
-              coloresGarajes[feature.properties.ID].estado
-            );
+          if (coloresGarajes[feature.properties.ID] != undefined) {
+            const nuevaFeature: {
+              type: "Feature";
+              geometry: { type: string; coordinates: any[] };
+              properties: { [key: string]: any };
+            } = {
+              type: "Feature",
+              geometry: feature.geometry,
+              properties: {
+                color: getColorByEstado(
+                  coloresGarajes[feature.properties.ID].estado
+                ),
+                id: feature.properties.ID,
+              },
+            };
+            feature.properties.color = getColorByEstado(-1);
+            garajesGuardadosGeojson.features.push(nuevaFeature);
           } else {
             feature.properties.color = getColorByEstado(0);
           }
         });
+
+
         map.addSource("garajes", {
           type: "geojson",
           data: geojsonGarajesData,
@@ -393,6 +471,22 @@ export default function MapComponent() {
             "fill-color": ["get", "color"],
           },
         });
+
+        
+       map.addSource("garajes-colores", {
+        type: "geojson",
+        data: garajesGuardadosGeojson as GeoJSON.FeatureCollection<GeoJSON.Geometry>,
+      });
+
+      // Añadir la capa de las calles
+      map.addLayer({
+        id: "garajes-colores-layer",
+        type: "fill", // Cambia a 'symbol' si quieres usar íconos personalizados
+        source: "garajes-colores",
+        paint: {
+          "fill-color": ["get", "color"],
+        },
+      });
         setOnloading(false);
       });
 
@@ -450,6 +544,7 @@ export default function MapComponent() {
             ) {
               if (e.features && e.features[0]?.properties) {
                 const props = e.features[0].properties;
+                const geometry = e.features[0].geometry;
 
                 const response = await fetch(
                   `${process.env.NEXT_PUBLIC_API_URL}/garaje/${props.ID}`,
@@ -473,6 +568,7 @@ export default function MapComponent() {
                   codigo: props.ID,
                   estado: data.estado,
                   comentario: data.comentario,
+                  geometry: geometry
                 };
                 setGarajeInfo({ ...info, lngLat: e.lngLat });
                 setOpenPopupGaraje(true);
