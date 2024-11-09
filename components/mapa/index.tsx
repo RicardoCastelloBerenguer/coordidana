@@ -291,9 +291,10 @@ export default function MapComponent() {
       });
 
       setMap(map);
-      // console.log("first");
-      map.on("click", "streets-layer", async (e) => {
-        //TODO DESCOMENTAR
+    map.on("click", "streets-layer", async (e) => {
+        if(ubicacionRef && ubicacionRef.current){
+          if(haversine(ubicacionRef.current!.latitude, ubicacionRef.current!.longitude, e.lngLat.lat, e.lngLat.lng) < DISTANCIA_LIMITE){
+
 
         if (ubicacionRef && ubicacionRef.current) {
           if (
