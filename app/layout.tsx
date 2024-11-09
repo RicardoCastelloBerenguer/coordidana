@@ -59,12 +59,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased ${recursive.className}`}
       >
-        <UserProvider>
-          <Header />
-          {children}
-          <Footer />
-        </UserProvider>
-        <Toaster />
+        <div className="min-h-screen flex flex-col">
+          <UserProvider>
+            <Header />
+            <main className="flex-grow">{children}</main>
+
+            <Footer />
+          </UserProvider>
+          <Toaster />
+        </div>
       </body>
     </html>
   );
