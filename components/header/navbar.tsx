@@ -24,7 +24,7 @@ const Navbar = ({
     <ul
       className={`flex items-center justify-center gap-6  pb-6 sm:p-2 flex-col sm:flex-row ${className}`}
     >
-      <Link onClick={handleClose} href={"/"}>
+      <Link onClick={handleClose} href={"/mapa"}>
         <Image
           src="/logo_completo.png" // Ruta de la imagen
           alt="Logo de la página web" // Texto alternativo para la imagen
@@ -38,7 +38,7 @@ const Navbar = ({
         <Link
           onClick={handleClose}
           className={buttonVariants({ variant: "outline" })}
-          href={"/"}
+          href={"/mapa"}
         >
           Mapa
         </Link>
