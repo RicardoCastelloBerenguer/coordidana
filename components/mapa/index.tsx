@@ -44,8 +44,8 @@ export default function MapComponent() {
   const { saveLocationLocalStorage } = useUser();
 
   // TODO DESCOMENTAR
-  //const DISTANCIA_LIMITE =50;
-  const DISTANCIA_LIMITE = 200;
+  const DISTANCIA_LIMITE =50;
+  //const DISTANCIA_LIMITE = 200;
 
   const ubicacionRef = useRef(ubicacion);
 
