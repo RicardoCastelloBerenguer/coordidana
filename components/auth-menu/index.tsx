@@ -105,6 +105,12 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
 
       if (response.ok) {
         console.log("first");
+        setLogin(true);
+        formRegister.reset({
+          username: "",
+          email: "",
+          password: "",
+        });
         toast({ title: "Te has registrado correctamente" });
       } else {
         let errorData = await response.json();

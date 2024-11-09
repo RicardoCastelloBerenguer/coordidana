@@ -26,7 +26,10 @@ const Header = () => {
             setOpen={setOpen}
             className="w-[200px] bg-white absolute left-1/2 transform -translate-x-1/2 top-32 rounded-lg pt-6 z-40"
           />
-          <div className="fixed inset-0 w-full h-screen blur-xl z-10 bg-black/50" />
+          <div
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 w-full h-screen blur-xl z-10 bg-black/50"
+          />
         </CollapsibleContent>
       </Collapsible>
       <Navbar className="hidden sm:flex absolute z-50 bg-white/80 w-full" />
