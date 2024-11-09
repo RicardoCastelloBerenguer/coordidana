@@ -14,7 +14,7 @@ import { features } from "process";
 
 import LocationModal from "./LocationModal";
 import { Button } from "../ui/button";
-import { LoaderCircle, LocateFixed } from "lucide-react";
+import { LoaderCircle, LocateFixed, RefreshCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/app/contexts/UserContext";
 import handleGetLocation from "@/lib/currentLocation";
@@ -49,7 +49,7 @@ export default function MapComponent() {
 
   // TODO DESCOMENTAR
   const DISTANCIA_LIMITE =50;
-  //const DISTANCIA_LIMITE = 200;
+  
 
   const ubicacionRef = useRef(ubicacion);
 
@@ -68,13 +68,6 @@ export default function MapComponent() {
           longitude: number;
         };
         setUbicacion(location);
-        console.log("Ubicación obtenida:", location);
-        map.flyTo({
-          center: [location.longitude, location.latitude], // Coordenadas de la ubicación
-          zoom: 18, // Nivel de zoom
-          essential: true, // Indica que la animación es necesaria
-        });
-
         map.flyTo({
           center: [location.longitude, location.latitude], // Coordenadas de la ubicación
           zoom: 18, // Nivel de zoom
@@ -94,6 +87,106 @@ export default function MapComponent() {
         console.error("Error capturado:", error.message);
       }
     }
+  };
+
+  const refrescarCalles = async () =>{
+
+
+    try {
+      
+      const sourceColores = map.getSource("streets-colors");
+      const geojsonColoresData = sourceColores._data;
+
+      
+      const sourceCalles = map.getSource("streets");
+      const geojsonCallesData = sourceCalles._data;
+
+      const colorsResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/prioridades`
+      );
+      const colorsData = await colorsResponse.json();
+      geojsonColoresData.features = [];
+      geojsonCallesData.features.forEach((feature: any) => {
+        const streetId = feature.properties.id_tramo; 
+        // Asegúrate de que cada característica tenga un ID único
+        // Asignar el color basado en los datos obtenidos
+        if (colorsData[streetId] != undefined) {
+          const nuevaFeature: {
+            type: "Feature";
+            geometry: { type: string; coordinates: any[] };
+            properties: { [key: string]: any };
+          } = {
+            type: "Feature",
+            geometry: feature.geometry,
+            properties: {
+              id_tramo: feature.properties.id_tramo,
+              nombre: feature.properties.nombre,
+              color: getColorByPrioridad(colorsData[streetId].prioridad) || 0,
+              id: colorsData[streetId].id || null,
+            },
+          };
+
+          geojsonColoresData.features.push(nuevaFeature);
+        }
+      });
+
+        sourceColores.setData(geojsonColoresData);
+
+    } catch (error: any) {
+      console.error("Error capturado:", error.message);
+    }
+  }
+
+  
+  const refrescarGarajes = async () =>{
+
+    try {
+      
+      const sourceColores = map.getSource("garajes-colores");
+      const geojsonColoresData = sourceColores._data;
+
+      
+      const sourceGarajes = map.getSource("garajes");
+      const geojsonGarajesData = sourceGarajes._data;
+
+      const coloresGarajesResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/colores-garajes`
+      );
+      const coloresGarajes = await coloresGarajesResponse.json();
+
+      geojsonColoresData.features = [];
+      geojsonGarajesData.features.forEach((feature: any) => {
+        const garajeId = feature.properties.ID; 
+        // Asegúrate de que cada característica tenga un ID único
+        // Asignar el color basado en los datos obtenidos
+        if (coloresGarajes[garajeId] != undefined) {
+          const nuevaFeature: {
+            type: "Feature";
+            geometry: { type: string; coordinates: any[] };
+            properties: { [key: string]: any };
+          } = {
+            type: "Feature",
+            geometry: feature.geometry,
+            properties: {
+              color: getColorByEstado(coloresGarajes[garajeId].estado),
+              id: coloresGarajes[garajeId].id || null,
+            },
+          };
+
+          geojsonColoresData.features.push(nuevaFeature);
+        }
+      });
+
+        sourceColores.setData(geojsonColoresData);
+
+    } catch (error: any) {
+      console.error("Error capturado:", error.message);
+    }
+  }
+
+  const handleRefrescarMapa = async () => {
+    refrescarCalles();
+    refrescarGarajes();
   };
 
   useEffect(() => {
@@ -119,23 +212,50 @@ export default function MapComponent() {
       },
     };
 
+    let contiene = false;
+    for (let i = 0; i < geojsonData.features.length; i++) {
+      if (geojsonData.features[i].properties.id_tramo === streetInfo.id_tramo) {
+        geojsonData.features[i].properties.color = getColorByPrioridad(row.prioridad);
+        contiene = true;
+      }
+    }
+    if(!contiene){
+      geojsonData.features.push(nuevaFeature);
+    }
+
     geojsonData.features.push(nuevaFeature);
     source.setData(geojsonData);
   }
 
   function updateGarajeColorInMap(codigo: any, estado: any) {
-    const source = map.getSource("garajes");
+    const source = map.getSource("garajes-colores");
 
     // Obtener el GeoJSON de la fuente
     const geojsonData = source._data;
 
-    geojsonData.features.forEach((feature: any) => {
-      if (feature.properties.ID == codigo) {
-        feature.properties.color = getColorByEstado(estado);
-        source.setData(geojsonData);
-        return;
+    const nuevaFeature: {
+      type: "Feature";
+      geometry: { type: string; coordinates: any[] };
+      properties: { [key: string]: any };
+    } = {
+      type: "Feature",
+      geometry: garajeInfo.geometry,
+      properties: {
+        id: codigo,
+        color: getColorByEstado(estado)
+      },
+    };
+    let contiene = false;
+    for (let i = 0; i < geojsonData.features.length; i++) {
+      if (geojsonData.features[i].properties.id === codigo) {
+        geojsonData.features[i].properties.color = getColorByEstado(estado);
+        contiene = true;
       }
-    });
+    }
+    if(!contiene){
+      geojsonData.features.push(nuevaFeature);
+    }
+    source.setData(geojsonData);
   }
 
   function getColorByPrioridad(prioridad: number) {
@@ -153,6 +273,8 @@ export default function MapComponent() {
 
   function getColorByEstado(estado: number) {
     switch (estado) {
+      case -1:
+      return "rgba(46, 41, 78, 0)";
       case 0:
         return "rgba(46, 41, 78, 0.15)";
       case 1:
@@ -187,7 +309,6 @@ export default function MapComponent() {
   useEffect(() => {
     if (Object.keys(location).length > 0) {
       setUbicacion(location);
-      console.log(location);
     }
   }, [location]);
 
@@ -305,15 +426,42 @@ export default function MapComponent() {
         );
         const coloresGarajes = await coloresGarajesResponse.json();
 
+        const garajesGuardadosGeojson: {
+          type: "FeatureCollection";
+          features: {
+            type: "Feature";
+            geometry: { type: string; coordinates: any[] };
+            properties: { [key: string]: any };
+          }[];
+        } = {
+          type: "FeatureCollection",
+          features: [],
+        };
+
         geojsonGarajesData.features.forEach((feature: any) => {
-          if (coloresGarajes[feature.properties.ID]) {
-            feature.properties.color = getColorByEstado(
-              coloresGarajes[feature.properties.ID].estado
-            );
+          if (coloresGarajes[feature.properties.ID] != undefined) {
+            const nuevaFeature: {
+              type: "Feature";
+              geometry: { type: string; coordinates: any[] };
+              properties: { [key: string]: any };
+            } = {
+              type: "Feature",
+              geometry: feature.geometry,
+              properties: {
+                color: getColorByEstado(
+                  coloresGarajes[feature.properties.ID].estado
+                ),
+                id: feature.properties.ID,
+              },
+            };
+            feature.properties.color = getColorByEstado(-1);
+            garajesGuardadosGeojson.features.push(nuevaFeature);
           } else {
             feature.properties.color = getColorByEstado(0);
           }
         });
+
+
         map.addSource("garajes", {
           type: "geojson",
           data: geojsonGarajesData,
@@ -329,22 +477,39 @@ export default function MapComponent() {
           },
         });
 
+
         map.on("sourcedata", function onSourceData(e) {
           // Comprobar que la fuente correcta se ha cargado y la capa está lista
-          if (e.sourceId === "garajes" && map.isSourceLoaded("garajes")) {
+          if (e.sourceId === "garajes-colores" && map.isSourceLoaded("garajes-colores")) {
             // Cambiar el estado de carga
             setOnloadingColores(false);
             // Eliminar el listener para que no se ejecute más veces
             map.off("sourcedata", onSourceData);
           }
         });
+
+        
+       map.addSource("garajes-colores", {
+        type: "geojson",
+        data: garajesGuardadosGeojson as GeoJSON.FeatureCollection<GeoJSON.Geometry>,
+      });
+
+      // Añadir la capa de las calles
+      map.addLayer({
+        id: "garajes-colores-layer",
+        type: "fill", // Cambia a 'symbol' si quieres usar íconos personalizados
+        source: "garajes-colores",
+        paint: {
+          "fill-color": ["get", "color"],
+        },
+      });
+        setOnloading(false);
+
       });
 
       setMap(map);
       map.on("click", "streets-layer", async (e) => {
-        console.log(ubicacion);
         if (!isLoggedIn) {
-          console.log("user not logged when clicking");
           toast({
             title: "Necesitas estar loggeado para hacer reportes",
             variant: "destructive",
@@ -380,7 +545,6 @@ export default function MapComponent() {
       map.on("click", "garajes-layer", async (e) => {
         //TODO DESCOMENTAR
         if (!isLoggedIn) {
-          console.log("user not logged when clicking");
           toast({
             title: "Necesitas estar loggeado para hacer reportes",
             variant: "destructive",
@@ -397,6 +561,7 @@ export default function MapComponent() {
             ) {
               if (e.features && e.features[0]?.properties) {
                 const props = e.features[0].properties;
+                const geometry = e.features[0].geometry;
 
                 const response = await fetch(
                   `${process.env.NEXT_PUBLIC_API_URL}/garaje/${props.ID}`,
@@ -409,7 +574,6 @@ export default function MapComponent() {
                 );
 
                 const data = await response.json();
-                console.log("Respuesta del servidor:", data);
 
                 if (!response.ok) {
                   throw new Error(
@@ -421,6 +585,7 @@ export default function MapComponent() {
                   codigo: props.ID,
                   estado: data.estado,
                   comentario: data.comentario,
+                  geometry: geometry
                 };
                 setGarajeInfo({ ...info, lngLat: e.lngLat });
                 setOpenPopupGaraje(true);
@@ -507,13 +672,27 @@ export default function MapComponent() {
         />
       )}
 
-      <Button
-        onClick={handleCentrarUbicacion}
-        variant={"outline"}
-        className="absolute z-40 top-0 sm:top-32 right-10 w-auto m-5"
-      >
-        <LocateFixed size={20} className="size-28" />
-      </Button>
+      <div className="absolute z-40 top-0 sm:top-32 right-10 w-auto m-5">
+        <div className="flex flex-col gap-3">
+          
+        <Button
+          onClick={handleRefrescarMapa}
+          variant={"outline"}
+        >
+          <RefreshCcw size={20} className="size-28" />
+        </Button>
+
+          <Button
+          onClick={handleCentrarUbicacion}
+          variant={"outline"}
+        >
+          <LocateFixed size={20} className="size-28" />
+        </Button>
+        
+        
+        </div>
+        
+      </div>
       {/* <Popup streetInfo={streetInfo} map={map} /> */}
     </>
   );
