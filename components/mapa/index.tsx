@@ -48,8 +48,7 @@ export default function MapComponent() {
   const [geoJsonDataCarreteras, setGeoJsonDataCarreteras] = useState<any>(null);
 
   // TODO DESCOMENTAR
-  const DISTANCIA_LIMITE =50;
-  
+  const DISTANCIA_LIMITE = 400;
 
   const ubicacionRef = useRef(ubicacion);
 
@@ -59,6 +58,7 @@ export default function MapComponent() {
   };
 
   const handleCentrarUbicacion = async () => {
+    console.log("first");
     if (!ubicacion) {
       setOpenPopupPermisos(true);
     } else {
@@ -78,7 +78,7 @@ export default function MapComponent() {
           marcadorAnterior.remove();
         }
         setMarcadorAnterior(
-          new maplibre.Marker({ color: '#803cec' })
+          new maplibre.Marker({ color: "#803cec" })
             .setLngLat([location.longitude, location.latitude])
             .addTo(map)
         );
@@ -88,15 +88,11 @@ export default function MapComponent() {
     }
   };
 
-  const refrescarCalles = async () =>{
-
-
+  const refrescarCalles = async () => {
     try {
-      
       const sourceColores = map.getSource("streets-colors");
       const geojsonColoresData = sourceColores._data;
 
-      
       const sourceCalles = map.getSource("streets");
       const geojsonCallesData = sourceCalles._data;
 
@@ -106,7 +102,7 @@ export default function MapComponent() {
       const colorsData = await colorsResponse.json();
       geojsonColoresData.features = [];
       geojsonCallesData.features.forEach((feature: any) => {
-        const streetId = feature.properties.id_tramo; 
+        const streetId = feature.properties.id_tramo;
         // Asegúrate de que cada característica tenga un ID único
         // Asignar el color basado en los datos obtenidos
         if (colorsData[streetId] != undefined) {
@@ -129,22 +125,17 @@ export default function MapComponent() {
         }
       });
 
-        sourceColores.setData(geojsonColoresData);
-
+      sourceColores.setData(geojsonColoresData);
     } catch (error: any) {
       console.error("Error capturado:", error.message);
     }
-  }
+  };
 
-  
-  const refrescarGarajes = async () =>{
-
+  const refrescarGarajes = async () => {
     try {
-      
       const sourceColores = map.getSource("garajes-colores");
       const geojsonColoresData = sourceColores._data;
 
-      
       const sourceGarajes = map.getSource("garajes");
       const geojsonGarajesData = sourceGarajes._data;
 
@@ -155,7 +146,7 @@ export default function MapComponent() {
 
       geojsonColoresData.features = [];
       geojsonGarajesData.features.forEach((feature: any) => {
-        const garajeId = feature.properties.ID; 
+        const garajeId = feature.properties.ID;
         // Asegúrate de que cada característica tenga un ID único
         // Asignar el color basado en los datos obtenidos
         if (coloresGarajes[garajeId] != undefined) {
@@ -176,12 +167,11 @@ export default function MapComponent() {
         }
       });
 
-        sourceColores.setData(geojsonColoresData);
-
+      sourceColores.setData(geojsonColoresData);
     } catch (error: any) {
       console.error("Error capturado:", error.message);
     }
-  }
+  };
 
   const handleRefrescarMapa = async () => {
     refrescarCalles();
@@ -214,11 +204,13 @@ export default function MapComponent() {
     let contiene = false;
     for (let i = 0; i < geojsonData.features.length; i++) {
       if (geojsonData.features[i].properties.id_tramo === streetInfo.id_tramo) {
-        geojsonData.features[i].properties.color = getColorByPrioridad(row.prioridad);
+        geojsonData.features[i].properties.color = getColorByPrioridad(
+          row.prioridad
+        );
         contiene = true;
       }
     }
-    if(!contiene){
+    if (!contiene) {
       geojsonData.features.push(nuevaFeature);
     }
 
@@ -241,7 +233,7 @@ export default function MapComponent() {
       geometry: garajeInfo.geometry,
       properties: {
         id: codigo,
-        color: getColorByEstado(estado)
+        color: getColorByEstado(estado),
       },
     };
     let contiene = false;
@@ -251,7 +243,7 @@ export default function MapComponent() {
         contiene = true;
       }
     }
-    if(!contiene){
+    if (!contiene) {
       geojsonData.features.push(nuevaFeature);
     }
     source.setData(geojsonData);
@@ -273,7 +265,7 @@ export default function MapComponent() {
   function getColorByEstado(estado: number) {
     switch (estado) {
       case -1:
-      return "rgba(46, 41, 78, 0)";
+        return "rgba(46, 41, 78, 0)";
       case 0:
         return "rgba(46, 41, 78, 0.15)";
       case 1:
@@ -317,8 +309,8 @@ export default function MapComponent() {
         container: mapContainer.current,
         style:
           "https://api.maptiler.com/maps/dataviz/style.json?key=gI4Oo4FqdNdASpvMjsac", // URL de estilo de MapLibre
-        center: [-0.376488, 39.477814],
-        zoom: 12,
+        center: [-0.39614, 39.42278],
+        zoom: 10,
       });
 
       map.on("load", async () => {
@@ -460,7 +452,6 @@ export default function MapComponent() {
           }
         });
 
-
         map.addSource("garajes", {
           type: "geojson",
           data: geojsonGarajesData,
@@ -476,10 +467,12 @@ export default function MapComponent() {
           },
         });
 
-      
         map.on("sourcedata", function onSourceData(e) {
           // Comprobar que la fuente correcta se ha cargado y la capa está lista
-          if (e.sourceId === "garajes-colores" && map.isSourceLoaded("garajes-colores")) {
+          if (
+            e.sourceId === "garajes-colores" &&
+            map.isSourceLoaded("garajes-colores")
+          ) {
             // Cambiar el estado de carga
             setOnloadingColores(false);
             // Eliminar el listener para que no se ejecute más veces
@@ -487,24 +480,24 @@ export default function MapComponent() {
           }
         });
 
-        
-       map.addSource("garajes-colores", {
-        type: "geojson",
-        data: garajesGuardadosGeojson as GeoJSON.FeatureCollection<GeoJSON.Geometry>,
-      });
+        map.addSource("garajes-colores", {
+          type: "geojson",
+          data: garajesGuardadosGeojson as GeoJSON.FeatureCollection<GeoJSON.Geometry>,
+        });
 
-      // Añadir la capa de las calles
-      map.addLayer({
-        id: "garajes-colores-layer",
-        type: "fill", // Cambia a 'symbol' si quieres usar íconos personalizados
-        source: "garajes-colores",
-        paint: {
-          "fill-color": ["get", "color"],
-        },
+        // Añadir la capa de las calles
+        map.addLayer({
+          id: "garajes-colores-layer",
+          type: "fill", // Cambia a 'symbol' si quieres usar íconos personalizados
+          source: "garajes-colores",
+          paint: {
+            "fill-color": ["get", "color"],
+          },
+        });
       });
-    })
 
       setMap(map);
+
       map.on("click", "streets-layer", async (e) => {
         if (!isLoggedIn) {
           toast({
@@ -582,7 +575,7 @@ export default function MapComponent() {
                   codigo: props.ID,
                   estado: data.estado,
                   comentario: data.comentario,
-                  geometry: geometry
+                  geometry: geometry,
                 };
                 setGarajeInfo({ ...info, lngLat: e.lngLat });
                 setOpenPopupGaraje(true);
@@ -671,24 +664,14 @@ export default function MapComponent() {
 
       <div className="absolute z-40 top-0 sm:top-32 right-2 w-auto m-5">
         <div className="flex flex-col gap-3">
-          
-        <Button
-          onClick={handleRefrescarMapa}
-          variant={"outline"}
-        >
-          <RefreshCcw size={20} className="size-28" />
-        </Button>
+          <Button onClick={handleRefrescarMapa} variant={"outline"}>
+            <RefreshCcw size={20} className="size-28" />
+          </Button>
 
-          <Button
-          onClick={handleCentrarUbicacion}
-          variant={"outline"}
-        >
-          <LocateFixed size={20} className="size-28" />
-        </Button>
-        
-        
+          <Button onClick={handleCentrarUbicacion} variant={"outline"}>
+            <LocateFixed size={20} className="size-28" />
+          </Button>
         </div>
-        
       </div>
       {/* <Popup streetInfo={streetInfo} map={map} /> */}
     </>
