@@ -643,15 +643,18 @@ export default function MapComponent() {
         </div>
       )}
 
-      {garajeInfo && (
-        <PopupGaraje
-          garajeInfo={garajeInfo}
-          setOpenPopup={setOpenPopupGaraje}
-          open={openPopupGaraje}
-          map={map}
-          updateMapa={updateGarajeColorInMap}
-        />
-      )}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        {garajeInfo && (
+          <PopupGaraje
+            garajeInfo={garajeInfo}
+            setOpenPopup={setOpenPopupGaraje}
+            open={openPopupGaraje}
+            map={map}
+            updateMapa={updateGarajeColorInMap}
+          />
+        )}
+      </div>
+
       {streetInfo && (
         <Popup
           streetInfo={streetInfo}

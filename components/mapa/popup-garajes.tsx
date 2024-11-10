@@ -68,6 +68,8 @@ const PopupGaraje: React.FC<PopupProps> = ({
       setEstado(garajeInfo.estado || null);
       setComentario(garajeInfo.comentario || "");
     }
+
+    console.log(garajeInfo);
   }, [garajeInfo]);
 
   const manejarGuardadoGaraje = async (e: React.FormEvent) => {
@@ -120,7 +122,7 @@ const PopupGaraje: React.FC<PopupProps> = ({
   return (
     <>
       <Dialog onOpenChange={setOpenPopup} open={open}>
-        <DialogContent className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[400px] md:max-w-500px]">
+        <DialogContent className="top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[400px] md:max-w-500px]">
           <DialogHeader>
             <DialogTitle>Estado del garaje</DialogTitle>
             <DialogDescription>
