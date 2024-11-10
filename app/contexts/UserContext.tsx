@@ -48,22 +48,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [location, setLocation] = useState({});
+  const [locationChecked, setLocationChecked] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
     if (!isLoggedIn) {
       checkIsLoggedIn();
-      checkLocation();
     }
   }, [isLoggedIn]);
 
   useEffect(() => {
-    console.log("useEffect location");
-    if (Object.keys(location).length === 0) {
-      console.log("checklocation");
+    if (!locationChecked && Object.keys(location).length === 0) {
       checkLocation();
+      setLocationChecked(true); // Marca que la verificación de ubicación ya se hizo
     }
-  }, [location]);
+  }, [location, locationChecked]);
 
   const checkIsLoggedIn = () => {
     setIsLoading(true);
@@ -91,7 +90,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const login = (userData: User) => {
-    console.log(userData);
     setIsLoading(true);
     localStorage.setItem("currentUser", JSON.stringify(userData));
     setUser(userData);

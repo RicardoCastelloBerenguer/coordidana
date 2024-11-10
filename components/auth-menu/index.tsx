@@ -28,6 +28,9 @@ const registerSchema = z.object({
   password: z
     .string()
     .min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
+  privacidad: z.boolean().refine((val) => val === true, {
+      message: 'Debe aceptar la política de privacidad para continuar.',
+    }),
 });
 
 const loginSchema = z.object({
@@ -87,7 +90,6 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
     let hashedPassword = hashPassword(dataRegister.password);
 
     try {
-      console.log(dataRegister);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/register`,
         {
@@ -99,17 +101,18 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
             usuario: dataRegister.username,
             pass: hashedPassword,
             email: dataRegister.email,
+            privacidad: dataRegister.privacidad
           }),
         }
       );
 
       if (response.ok) {
-        console.log("first");
         setLogin(true);
         formRegister.reset({
           username: "",
           email: "",
           password: "",
+          privacidad: false
         });
         toast({ title: "Te has registrado correctamente" });
       } else {
@@ -128,7 +131,6 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
 
   const onSubmitLogin = async (dataLogin: z.infer<typeof loginSchema>) => {
     let hashedPassword = hashPassword(dataLogin.passwordLogin);
-    console.log(dataLogin);
     try {
       // usuario, pass
 
@@ -147,7 +149,6 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
         toast({ title: "Has iniciado sesión correctamente" });
         let data = await response.json();
         loginUser(data.usuario);
-        console.log("ok");
       } else {
         let errorData = await response.json();
         toast({
@@ -155,7 +156,6 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
           variant: "destructive",
           description: errorData.message,
         });
-        console.log("not ok");
       }
     } catch (error) {
       console.error(error);
@@ -172,7 +172,7 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
           </DialogTitle>
         </DialogHeader>
         {!login ? (
-          <RegisterForm
+          <RegisterForm setOpen={setOpen}
             formType={formRegister}
             onSubmitRegister={onSubmitRegister}
             setLogin={setLogin}

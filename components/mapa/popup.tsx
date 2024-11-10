@@ -66,7 +66,7 @@ const Popup: React.FC<PopupProps> = ({
     setIsHayVehiculos(false);
     setOpenPopup(false);
   };
-
+ 
   const manejarGuardadoCarretera = async (e: React.FormEvent) => {
     e.preventDefault();
     const reporte = {
@@ -102,7 +102,6 @@ const Popup: React.FC<PopupProps> = ({
         });
         // throw new Error(data.message || "Error al guardar el reporte");
       } else {
-        console.log("first");
         toast({
           title: "Reporte guardado correctamente",
         });
@@ -150,20 +149,7 @@ const Popup: React.FC<PopupProps> = ({
                   }}
                 />
               </div>
-              <div className="flex w-full gap-5">
-                <Label htmlFor="noTransitable">No transitable</Label>
-                <Checkbox
-                  id="noTransitable"
-                  checked={isNoTransitable}
-                  onCheckedChange={(checked: any) => {
-                    setIsNoTransitable(checked);
-                    if (checked) {
-                      setIsLimpia(false);
-                    }
-                  }}
-                />
-              </div>
-
+              
               <div className="flex w-full gap-5">
                 <Label htmlFor="hayVehiculos">Hay vehículos</Label>
                 <Checkbox
@@ -179,7 +165,7 @@ const Popup: React.FC<PopupProps> = ({
               </div>
 
               <div className="flex w-full gap-5">
-                <Label htmlFor="escombros">Hay escombros</Label>
+                <Label htmlFor="escombros">Hay escombros / barro</Label>
                 <Checkbox
                   id="escombros"
                   checked={isEscombros}
@@ -191,6 +177,20 @@ const Popup: React.FC<PopupProps> = ({
                   }}
                 />
               </div>
+              <div className="flex w-full gap-5">
+                <Label htmlFor="noTransitable">No transitable</Label>
+                <Checkbox
+                  id="noTransitable"
+                  checked={isNoTransitable}
+                  onCheckedChange={(checked: any) => {
+                    setIsNoTransitable(checked);
+                    if (checked) {
+                      setIsLimpia(false);
+                    }
+                  }}
+                />
+              </div>
+
 
               <div className="flex w-full flex-col mt-5 gap-2">
                 <Label htmlFor="comentarios" className="ml-1">

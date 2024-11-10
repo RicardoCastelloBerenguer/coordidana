@@ -11,15 +11,22 @@ import {
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Checkbox } from "../ui/checkbox";
+import Link from "next/link";
+import { Label } from "@/components/ui/label";
+import { Check } from "lucide-react";
+import { buttonVariants } from "../ui/button";
 
 const RegisterForm = ({
   formType,
   onSubmitRegister,
   setLogin,
+  setOpen
 }: {
   formType: any;
   onSubmitRegister: any;
   setLogin: any;
+  setOpen: any;
 }) => {
   return (
     <Form {...formType}>
@@ -69,6 +76,33 @@ const RegisterForm = ({
                   {...field}
                 />
               </FormControl>
+              <FormMessage className="text-xs" />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={formType.control}
+          name="privacidad"
+          render={({ field }) => (
+            <FormItem>
+            <FormControl>
+              <Checkbox checked={field.value}
+                {...field}
+                onCheckedChange={(checked: any) => {
+                  console.log('Valor del checkbox:', checked);
+                  field.onChange(checked);
+                }}
+              />
+            </FormControl>
+              <FormLabel>Acepto la{' '}
+                <Link href={"/politicas-privacidad"} onClick={() => {
+                  setLogin(true);
+                  setOpen(false);
+                }} style={{ color: '#803cec', textDecoration: 'underline' }}>
+                   política de privacidad
+                </Link>
+                </FormLabel>
               <FormMessage className="text-xs" />
             </FormItem>
           )}
