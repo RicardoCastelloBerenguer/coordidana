@@ -48,7 +48,7 @@ export default function MapComponent() {
   const [geoJsonDataCarreteras, setGeoJsonDataCarreteras] = useState<any>(null);
 
   // TODO DESCOMENTAR
-  const DISTANCIA_LIMITE =50;
+  const DISTANCIA_LIMITE = 10;
   
 
   const ubicacionRef = useRef(ubicacion);
