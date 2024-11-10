@@ -103,7 +103,6 @@ const PopupGaraje: React.FC<PopupProps> = ({
       );
 
       const data = await response.json();
-      console.log("Respuesta del servidor:", data);
 
       if (!response.ok) {
         throw new Error(data.message || "Error al guardar el reporte");

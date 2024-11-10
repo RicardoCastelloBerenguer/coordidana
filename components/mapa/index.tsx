@@ -48,7 +48,7 @@ export default function MapComponent() {
   const [geoJsonDataCarreteras, setGeoJsonDataCarreteras] = useState<any>(null);
 
   // TODO DESCOMENTAR
-  const DISTANCIA_LIMITE = 400;
+  const DISTANCIA_LIMITE = 10;
 
   const ubicacionRef = useRef(ubicacion);
 
@@ -525,6 +525,11 @@ export default function MapComponent() {
                 setStreetInfo({ ...info, lngLat: e.lngLat });
                 setOpenPopup(true);
               }
+            } else {
+              toast({
+                title: "Debes estar a menos de 10 km de la localización",
+                variant: "destructive",
+              });
             }
           } else {
             setOpenPopupPermisos(true);
@@ -580,6 +585,11 @@ export default function MapComponent() {
                 setGarajeInfo({ ...info, lngLat: e.lngLat });
                 setOpenPopupGaraje(true);
               }
+            } else {
+              toast({
+                title: "Debes estar a menos de 10 km de la localización",
+                variant: "destructive",
+              });
             }
           } else {
             setOpenPopupPermisos(true);
