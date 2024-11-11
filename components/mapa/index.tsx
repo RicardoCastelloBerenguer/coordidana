@@ -58,16 +58,17 @@ export default function MapComponent() {
   };
 
   const handleCentrarUbicacion = async () => {
-    console.log("first");
     if (!ubicacion) {
       setOpenPopupPermisos(true);
     } else {
       try {
+        
         const location = (await handleGetLocation()) as {
           latitude: number;
           longitude: number;
         };
         setUbicacion(location);
+        saveLocationLocalStorage(location);
         map.flyTo({
           center: [location.longitude, location.latitude], // Coordenadas de la ubicación
           zoom: 18, // Nivel de zoom
@@ -315,13 +316,18 @@ export default function MapComponent() {
 
       map.on("load", async () => {
         setOnloadingData(true);
-        // if (!ubicacionRef || !ubicacionRef.current) {
-        //   setOpenPopupPermisos(true);
-        // }
-        // Cargar el archivo GeoJSON
-        console.time("prueba");
+        
+        if(ubicacionRef && ubicacionRef.current){
+          
+          const newlocation = (await handleGetLocation()) as {
+            latitude: number;
+            longitude: number;
+          };
+          setUbicacion(newlocation);
+          saveLocationLocalStorage(newlocation);
+        }
+
         const data = await fetchAndSaveGeoJson();
-        console.timeEnd("prueba");
         const geojsonData = data!.carreteras;
 
         // Hacer una única llamada para obtener todos los colores de las calles

@@ -147,11 +147,9 @@ const Popup: React.FC<PopupProps> = ({
             comentario.comentario.trim() !== ""
         );
 
-        console.log(filteredData);
 
         setComentariosTramo(filteredData);
 
-        // console.log(data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }

@@ -21,7 +21,7 @@ interface UserType {
   isLoggedIn: boolean;
   isLoading: boolean;
   location: {};
-  saveLocationLocalStorage: (location: { lat: number; lng: number }) => void;
+  saveLocationLocalStorage: (location: { latitude: number; longitude: number }) => void;
 }
 
 const defaultUser: User = {
@@ -107,14 +107,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     window.location.reload();
   };
 
-  const saveLocationLocalStorage = (location: { lat: number; lng: number }) => {
+  const saveLocationLocalStorage = (location: { latitude: number; longitude: number }) => {
     localStorage.setItem("location", JSON.stringify(location));
     setLocation(location);
   };
 
   const updateLocationLocalStorage = (location: {
-    lat: number;
-    lng: number;
+    latitude: number;
+    longitude: number;
   }) => {
     localStorage.setItem("location", JSON.stringify(location));
   };

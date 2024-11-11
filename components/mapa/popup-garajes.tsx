@@ -69,7 +69,6 @@ const PopupGaraje: React.FC<PopupProps> = ({
       setComentario(garajeInfo.comentario || "");
     }
 
-    console.log(garajeInfo);
   }, [garajeInfo]);
 
   const manejarGuardadoGaraje = async (e: React.FormEvent) => {

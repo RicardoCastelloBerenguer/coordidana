@@ -90,7 +90,6 @@ const RegisterForm = ({
               <Checkbox checked={field.value}
                 {...field}
                 onCheckedChange={(checked: any) => {
-                  console.log('Valor del checkbox:', checked);
                   field.onChange(checked);
                 }}
               />
