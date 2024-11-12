@@ -24,7 +24,7 @@ const Header = () => {
         <CollapsibleContent>
           <Navbar
             setOpen={setOpen}
-            className="w-[200px] bg-white absolute left-1/2 transform -translate-x-1/2 top-32 rounded-lg pt-6 z-40"
+            className="w-[200px] bg-white absolute left-1/2 transform -translate-x-1/2 top-32 rounded-lg pt-6 z-50"
           />
           <div
             onClick={() => setOpen(false)}

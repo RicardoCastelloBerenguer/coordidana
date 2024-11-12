@@ -68,7 +68,6 @@ const PopupGaraje: React.FC<PopupProps> = ({
       setEstado(garajeInfo.estado || null);
       setComentario(garajeInfo.comentario || "");
     }
-
   }, [garajeInfo]);
 
   const manejarGuardadoGaraje = async (e: React.FormEvent) => {
@@ -86,16 +85,18 @@ const PopupGaraje: React.FC<PopupProps> = ({
       codigo: garajeInfo!.codigo,
       comentario: comentario,
       estado: estado,
-      idUsuario: user,
+      idUsuario: user?.id,
     };
 
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/garaje`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(reporte),
         }

@@ -86,17 +86,19 @@ const Popup: React.FC<PopupProps> = ({
       transitable: !isNoTransitable,
       coches: isHayVehiculos,
       escombros: isEscombros,
-      idUsuario: user,
+      idUsuario: user?.id,
       prioridad: getPrioridad(isNoTransitable, isHayVehiculos, isEscombros),
     };
 
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/reportes/${streetInfo!.id_tramo}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(reporte),
         }
@@ -147,9 +149,7 @@ const Popup: React.FC<PopupProps> = ({
             comentario.comentario.trim() !== ""
         );
 
-
         setComentariosTramo(filteredData);
-
       } catch (error) {
         console.error("Error fetching data:", error);
       }

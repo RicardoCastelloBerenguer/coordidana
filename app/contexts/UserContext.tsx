@@ -7,26 +7,45 @@ import React, {
   useState,
 } from "react";
 
+import { jwtDecode } from "jwt-decode";
+import { boolean } from "zod";
+
+interface JwtPayload {
+  id: number;
+  rol: string;
+  nombre: string;
+  exp?: number;
+}
+
 interface User {
-  email: string;
-  password: string;
+  id: number | null;
+  nombre: string;
+  // email: string;
+  password?: string | null;
+  rol: string;
 }
 
 interface UserType {
   user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User>>;
+  setUser: React.Dispatch<React.SetStateAction<any>>;
   checkIsLoggedIn: () => void;
   logout: () => void;
   login: (userData: any) => void; // Cambia esto para aceptar un argumento
   isLoggedIn: boolean;
   isLoading: boolean;
   location: {};
-  saveLocationLocalStorage: (location: { latitude: number; longitude: number }) => void;
+  userWithRole: (rol: string) => boolean;
+  saveLocationLocalStorage: (location: {
+    latitude: number;
+    longitude: number;
+  }) => void;
 }
 
 const defaultUser: User = {
-  email: "",
-  password: "",
+  id: null,
+  nombre: "",
+  password: null,
+  rol: "user",
 };
 
 const defaultValue: UserType = {
@@ -38,6 +57,7 @@ const defaultValue: UserType = {
   isLoggedIn: false,
   location: {},
   isLoading: false,
+  userWithRole: (rol: string) => false,
   saveLocationLocalStorage: () => {},
 };
 
@@ -66,16 +86,28 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const checkIsLoggedIn = () => {
     setIsLoading(true);
-    const isLoggedin = localStorage.getItem("currentUser");
-    if (isLoggedin) {
+    const tokenData = localStorage.getItem("token");
+    if (tokenData) {
       setIsLoggedIn(true);
-      setUser(JSON.parse(isLoggedin));
+      decodeJwtAndSave(tokenData);
       setIsLoading(false);
     } else {
       setIsLoggedIn(false);
-      setUser(defaultUser);
       setIsLoading(false);
     }
+  };
+
+  const decodeJwtAndSave = (jwt: string) => {
+    const decoded = jwtDecode<JwtPayload>(jwt);
+
+    setUser({ id: decoded.id, rol: decoded.rol, nombre: decoded.nombre });
+  };
+
+  const userWithRole = (rol: string) => {
+    console.log(user.rol);
+    console.log(rol);
+    if (user.rol === rol) return true;
+    return false;
   };
 
   const checkLocation = async () => {
@@ -89,25 +121,32 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   };
 
-  const login = (userData: User) => {
+  const login = (tokenData: string) => {
     setIsLoading(true);
-    localStorage.setItem("currentUser", JSON.stringify(userData));
-    setUser(userData);
-    setIsLoggedIn(true);
-    setIsLoading(false);
-    window.location.reload();
+    localStorage.setItem("token", tokenData);
+    try {
+      const user = decodeJwtAndSave(tokenData);
+      window.location.reload();
+      return user;
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
   };
 
   const logout = () => {
     setIsLoading(true);
-    localStorage.removeItem("currentUser");
+    localStorage.removeItem("token");
     setUser(defaultUser);
     setIsLoggedIn(false);
     setIsLoading(false);
     window.location.reload();
   };
 
-  const saveLocationLocalStorage = (location: { latitude: number; longitude: number }) => {
+  const saveLocationLocalStorage = (location: {
+    latitude: number;
+    longitude: number;
+  }) => {
     localStorage.setItem("location", JSON.stringify(location));
     setLocation(location);
   };
@@ -129,6 +168,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     login,
     location,
     saveLocationLocalStorage,
+    userWithRole,
   };
 
   return (

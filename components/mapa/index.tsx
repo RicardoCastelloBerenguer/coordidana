@@ -41,14 +41,14 @@ export default function MapComponent() {
     useState<maplibregl.Marker | null>(null);
   const { toast } = useToast();
 
-  const { isLoggedIn, location } = useUser();
+  const { isLoggedIn, location, userWithRole } = useUser();
 
   const { saveLocationLocalStorage } = useUser();
 
   const [geoJsonDataCarreteras, setGeoJsonDataCarreteras] = useState<any>(null);
 
   // TODO DESCOMENTAR
-  const DISTANCIA_LIMITE = 10;
+  const DISTANCIA_LIMITE = userWithRole("admin") ? 100000 : 10;
 
   const ubicacionRef = useRef(ubicacion);
 
@@ -62,7 +62,6 @@ export default function MapComponent() {
       setOpenPopupPermisos(true);
     } else {
       try {
-        
         const location = (await handleGetLocation()) as {
           latitude: number;
           longitude: number;
@@ -308,17 +307,15 @@ export default function MapComponent() {
     if (typeof window !== "undefined" && mapContainer.current) {
       const map = new maplibre.Map({
         container: mapContainer.current,
-        style:
-          "/estilo.json", // URL de estilo de MapLibre
+        style: "/estilo.json", // URL de estilo de MapLibre
         center: [-0.39614, 39.42278],
         zoom: 10,
       });
 
       map.on("load", async () => {
         setOnloadingData(true);
-        
-        if(ubicacionRef && ubicacionRef.current){
-          
+
+        if (ubicacionRef && ubicacionRef.current) {
           const newlocation = (await handleGetLocation()) as {
             latitude: number;
             longitude: number;
@@ -641,7 +638,7 @@ export default function MapComponent() {
       <div className="relative w-full h-screen">
         <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />
         {loadingData && (
-          <div className="absolute top-14 left-0 right-0 bottom-0 flex justify-center items-center z-50">
+          <div className="absolute top-14 left-0 right-0 bottom-0 flex justify-center items-center z-40">
             <div className="flex flex-col items-center justify-center gap-2">
               <LoaderCircle className="animate-spin size-20" />
               <span>Cargando datos del mapa...</span>
