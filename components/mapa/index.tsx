@@ -309,7 +309,7 @@ export default function MapComponent() {
       const map = new maplibre.Map({
         container: mapContainer.current,
         style:
-          "https://api.maptiler.com/maps/dataviz/style.json?key=gI4Oo4FqdNdASpvMjsac", // URL de estilo de MapLibre
+          "/estilo.json", // URL de estilo de MapLibre
         center: [-0.39614, 39.42278],
         zoom: 10,
       });
