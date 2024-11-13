@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibre from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Popup from "./popup";
+import Search from "./search";
 import { Marker } from "maplibre-gl";
 
 import getPrioridad from "@/lib/getPrioridad";
@@ -689,6 +690,12 @@ export default function MapComponent() {
           </Button>
         </div>
       </div>
+      <div className="absolute z-40 top-0 sm:top-32 right-2 w-auto m-5">
+        <div className="flex flex-col gap-3">
+        <Search map ={map} />
+        </div>
+      </div>
+      
       {/* <Popup streetInfo={streetInfo} map={map} /> */}
     </>
   );
