@@ -45,7 +45,7 @@ export default function MapComponent() {
 
   const { saveLocationLocalStorage } = useUser();
 
-  const [geoJsonDataCarreteras, setGeoJsonDataCarreteras] = useState<any>(null);
+  const [idCiudad, setIdCiudad] = useState<string>("MLG");
 
   // TODO DESCOMENTAR
   const DISTANCIA_LIMITE = userWithRole("admin") ? 100000 : 10;
@@ -55,6 +55,12 @@ export default function MapComponent() {
   const handleUbicacionUpdate = (newUbicacion: any) => {
     setUbicacion(newUbicacion); // Actualiza el estado de location
     saveLocationLocalStorage(newUbicacion);
+  };
+
+  
+  const handleBotonComunidad = (newUbicacion: any) => {
+    //Cambia ruta geojson()
+    //refreshMapa()
   };
 
   const handleCentrarUbicacion = async () => {
@@ -324,7 +330,7 @@ export default function MapComponent() {
           saveLocationLocalStorage(newlocation);
         }
 
-        const data = await fetchAndSaveGeoJson();
+        const data = await fetchAndSaveGeoJson(idCiudad);
         const geojsonData = data!.carreteras;
 
         // Hacer una única llamada para obtener todos los colores de las calles
