@@ -20,6 +20,8 @@ import { useUser } from "@/app/contexts/UserContext";
 import handleGetLocation from "@/lib/currentLocation";
 import { fetchAndSaveGeoJson } from "@/lib/indexedDB";
 
+import { localizaciones } from "@/app/config/config";
+
 interface Ubicacion {
   latitude: number;
   longitude: number;
@@ -55,12 +57,6 @@ export default function MapComponent() {
   const handleUbicacionUpdate = (newUbicacion: any) => {
     setUbicacion(newUbicacion); // Actualiza el estado de location
     saveLocationLocalStorage(newUbicacion);
-  };
-
-  
-  const handleBotonComunidad = (newUbicacion: any) => {
-    //Cambia ruta geojson()
-    //refreshMapa()
   };
 
   const handleCentrarUbicacion = async () => {
@@ -311,10 +307,16 @@ export default function MapComponent() {
 
   useEffect(() => {
     if (typeof window !== "undefined" && mapContainer.current) {
+      
+      let idCiudad = localStorage.getItem("current-location")
+      if(!idCiudad){
+        idCiudad = "VLC";
+      }
+      const objLocalizacion = localizaciones.find((obj: any) => obj.value == idCiudad);
       const map = new maplibre.Map({
         container: mapContainer.current,
-        style: "/estilo.json", // URL de estilo de MapLibre
-        center: [-0.39614, 39.42278],
+        style: "/estilo.json",
+        center: objLocalizacion!.coordenadas as [number, number],
         zoom: 10,
       });
 
@@ -329,7 +331,7 @@ export default function MapComponent() {
           setUbicacion(newlocation);
           saveLocationLocalStorage(newlocation);
         }
-
+        
         const data = await fetchAndSaveGeoJson(idCiudad);
         const geojsonData = data!.carreteras;
 

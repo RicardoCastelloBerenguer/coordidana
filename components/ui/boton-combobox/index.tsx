@@ -1,7 +1,8 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { Check, ChevronsUpDown } from "lucide-react";
+import { localizaciones } from "@/app/config/config";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,26 +20,28 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const localizaciones = [
-  {
-    value: "valencia",
-    label: "Valencia",
-  },
-  {
-    value: "malaga",
-    label: "Málaga",
-  },
-];
 
 const ComboboxButton = ({ classname }: { classname?: string }) => {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
-  const handleSelect = (currentValue: any) => {
-    setValue(currentValue === value ? "" : currentValue);
+  const handleSelect = (currentValue: any, label: any) => {
+    setValue(currentValue === value ? "" : label);
     if (currentValue) localStorage.setItem("current-location", currentValue);
     setOpen(false);
+    window.location.reload()
   };
+
+  useEffect(() => {
+    let localizacion = localStorage.getItem("current-location");
+    if(localizacion){
+      const objLocalizacion = localizaciones.find((loc) => loc.value === localizacion)
+      setValue(objLocalizacion!.label);
+    } else {
+      const objLocalizacion = localizaciones.find((loc) => loc.value === "VLC")
+      setValue(objLocalizacion!.label);
+    }
+  }, [])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -49,7 +52,7 @@ const ComboboxButton = ({ classname }: { classname?: string }) => {
           aria-expanded={open}
           className="justify-between w-[210px]"
         >
-          {value ? value.toUpperCase() : "Selecciona localización"}
+          {value ? value : "Selecciona localización"}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -63,8 +66,8 @@ const ComboboxButton = ({ classname }: { classname?: string }) => {
                   className="hover:cursor-pointer"
                   key={localizacion.value}
                   value={localizacion.value}
-                  onSelect={(currentValue) => {
-                    handleSelect(currentValue);
+                  onSelect={(currentValue: any) => {
+                    handleSelect(currentValue, localizacion.label);
                   }}
                 >
                   {localizacion.label}
