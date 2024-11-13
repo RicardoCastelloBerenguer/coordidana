@@ -9,6 +9,22 @@ import {
 } from "@/components/ui/collapsible";
 import { Menu, Rows3 } from "lucide-react";
 import Navbar from "./navbar";
+
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import ComboboxButton from "../ui/boton-combobox";
+
 const Header = () => {
   const [open, setOpen] = useState<boolean>(false);
   return (
@@ -19,7 +35,7 @@ const Header = () => {
         className="block sm:hidden absolute transform w-full z-50" //
       >
         <CollapsibleTrigger className="m-4">
-          <Menu className="text-primary bg-zinc-200 rounded-lg p-2 size-10 absolute z-40" />
+          <Menu className="text-primary bg-zinc-200 rounded-lg p-2 top-16 size-10 absolute z-40" />
         </CollapsibleTrigger>
         <CollapsibleContent>
           <Navbar
@@ -32,6 +48,7 @@ const Header = () => {
           />
         </CollapsibleContent>
       </Collapsible>
+      <ComboboxButton classname="absolute m-4 left-0 top-1 sm:top-14 z-50" />
       <Navbar className="hidden sm:flex absolute z-50 bg-white/80 w-full" />
     </nav>
   );
