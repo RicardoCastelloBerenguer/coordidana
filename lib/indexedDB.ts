@@ -1,3 +1,4 @@
+import { localizaciones } from "@/app/config/config";
 import Dexie, { Table } from "dexie";
 
 interface CarreteraData {
@@ -37,30 +38,19 @@ export async function fetchAndSaveGeoJson(id: string) {
       };
     }
 
-    if(id == "VLC"){
-      const geojsonCarreterasData = await fetch("/carreteras.geojson").then(
-        (response) => response.json()
-      );
-      const geojsonGarajesData = await fetch("/garajes.geojson").then(
-        (response) => response.json()
-      );
+    const localizacion = localizaciones.find((obj) => obj.value === id);
+    
+    const geojsonCarreterasData = await fetch(localizacion!.geojson_carreteras).then(
+      (response) => response.json()
+    );
+    const geojsonGarajesData = await fetch(localizacion!.geojson_garajes).then(
+      (response) => response.json()
+    );
 
-      await db.carreteras.put({ id: "carreteras_VLC", data: geojsonCarreterasData });
-      await db.garajes.put({ id: "garajes_VLC", data: geojsonGarajesData });
-      return { carreteras: geojsonCarreterasData, garajes: geojsonGarajesData };
-    }
-    if(id = "MLG"){
-      const geojsonMalagaCarreterasData = await fetch("/carreteras_malaga.geojson").then(
-        (response) => response.json()
-      );
-      const geojsonMalagaGarajesData = await fetch("/garajes.geojson").then(
-        (response) => response.json()
-      );
-
-      await db.carreteras.put({ id: "carreteras_MLG", data: geojsonMalagaCarreterasData });
-      await db.garajes.put({ id: "garajes_MLG", data: geojsonMalagaGarajesData });
-      return { carreteras: geojsonMalagaCarreterasData, garajes: geojsonMalagaGarajesData };
-    }
+    await db.carreteras.put({ id: `carreteras_${id}`, data: geojsonCarreterasData });
+    await db.garajes.put({ id: `garajes_${id}`, data: geojsonGarajesData });
+    return { carreteras: geojsonCarreterasData, garajes: geojsonGarajesData };
+    
 
 
   } catch (error) {
