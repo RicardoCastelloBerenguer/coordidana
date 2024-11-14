@@ -31,6 +31,7 @@ const registerSchema = z.object({
   privacidad: z.boolean().refine((val) => val === true, {
     message: "Debe aceptar la política de privacidad para continuar.",
   }),
+  tipo: z.string().optional()
 });
 
 const loginSchema = z.object({
@@ -102,19 +103,35 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
             pass: hashedPassword,
             email: dataRegister.email,
             privacidad: dataRegister.privacidad,
+            tipo: dataRegister.tipo? dataRegister.tipo: "N" 
           }),
         }
       );
 
       if (response.ok) {
-        setLogin(true);
+        //toast({ title: "Te has registrado correctamente" });
         formRegister.reset({
           username: "",
           email: "",
           password: "",
           privacidad: false,
+          tipo: "",
         });
-        toast({ title: "Te has registrado correctamente" });
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            usuario: dataRegister.username,
+            pass: hashedPassword,
+          }),
+        });
+        
+        let data = await response.json();
+        loginUser(data.token);
+  
       } else {
         let errorData = await response.json();
         toast({

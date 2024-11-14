@@ -16,6 +16,7 @@ import Link from "next/link";
 import { Label } from "@/components/ui/label";
 import { Check } from "lucide-react";
 import { buttonVariants } from "../ui/button";
+import ComboboxUsuario from "../ui/boton-combobox/ComboboxUsuario";
 
 const RegisterForm = ({
   formType,
@@ -80,7 +81,20 @@ const RegisterForm = ({
             </FormItem>
           )}
         />
-        
+        <FormField
+          control={formType.control}
+          name="tipo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>¿Eres residente o voluntario?</FormLabel><br/>
+              <FormControl>
+                <ComboboxUsuario 
+                {...field}/>
+              </FormControl>
+              <FormMessage className="text-xs" />
+            </FormItem>
+          )}
+        />
         <FormField
           control={formType.control}
           name="privacidad"
