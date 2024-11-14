@@ -104,8 +104,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const userWithRole = (rol: string) => {
-    console.log(user.rol);
-    console.log(rol);
     if (user.rol === rol) return true;
     return false;
   };
