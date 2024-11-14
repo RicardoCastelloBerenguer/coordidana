@@ -690,7 +690,7 @@ export default function MapComponent() {
           </Button>
         </div>
       </div>
-      <div className="absolute z-40 top-0 sm:top-32 right-2 w-auto m-5">
+      <div className="absolute z-0 top-0 sm:top-32 right-2 w-auto m-5">
         <div className="flex flex-col gap-3">
         <Search map ={map} />
         </div>
