@@ -47,8 +47,6 @@ export default function MapComponent() {
 
   const { saveLocationLocalStorage } = useUser();
 
-  const [idCiudad, setIdCiudad] = useState<string>("MLG");
-
   // TODO DESCOMENTAR
   const DISTANCIA_LIMITE = userWithRole("admin") ? 100000 : 10;
 
