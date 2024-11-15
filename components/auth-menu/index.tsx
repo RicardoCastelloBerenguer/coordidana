@@ -122,7 +122,6 @@ const AuthMenu: React.FC<AuthMenuProps> = ({ children }) => {
           variant: "destructive",
           description: errorData.message,
         });
-        console.log(errorData);
       }
     } catch (error) {
       console.error(error);

@@ -1,6 +1,6 @@
 // components/Search.js
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "../ui/input";
 import { SeparatorHorizontal } from "lucide-react";
 
@@ -21,6 +21,23 @@ const Search = ({ map, className }: SearchProps) => {
   const [results, setResults] = useState<NominatimResult[]>([]); // Guardará los resultados de la búsqueda
   const [loading, setLoading] = useState(false); // Para mostrar un spinner de carga
 
+  const [showDropdown, setShowDropdown] = useState(false); // Controla si se muestra el desplegable
+  const searchContainerRef = useRef<HTMLDivElement>(null); // Referencia al contenedor principal
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+          if (
+            searchContainerRef.current &&
+            !searchContainerRef.current.contains(event.target as Node)
+          ) {
+            setShowDropdown(false); // Ocultar el desplegable si el clic fue fuera
+          }
+        };
+    
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+      }, []);
+  
   function removeAfterSecondComma(input: string): string {
     // Divide el string en un array usando la coma como separador
     const parts = input.split(",");
@@ -45,9 +62,7 @@ const Search = ({ map, className }: SearchProps) => {
     setLoading(true);
 
     const response = await fetch(
-      `http://185.253.154.140/search?q=${encodeURIComponent(
-        query
-      )}&format=json&addressdetails=1&limit=10`
+      `${process.env.NEXT_PUBLIC_API_URL}/nominatim?query=${encodeURIComponent(query)}`
     );
     const data = await response.json();
 
@@ -58,6 +73,7 @@ const Search = ({ map, className }: SearchProps) => {
     }));
     setResults(dataFiltrada);
     setLoading(false);
+    setShowDropdown(true);
   };
 
   const handleClick = (result: NominatimResult) => {
@@ -67,6 +83,7 @@ const Search = ({ map, className }: SearchProps) => {
       essential: true, // Indica que la animación es necesaria
     });
     setQuery("");
+    setShowDropdown(false);
   };
 
   // Se llama cada vez que el usuario escribe algo
@@ -79,7 +96,7 @@ const Search = ({ map, className }: SearchProps) => {
   }, [query]);
 
   return (
-    <div className={className}>
+    <div ref={searchContainerRef} className={className}>
       <Input
         aria-label="Navegador calles municipios"
         type="text"
@@ -89,7 +106,7 @@ const Search = ({ map, className }: SearchProps) => {
         className="bg-white text-primary font-semibold rounded-b-none"
       />
       {loading && <p>Cargando...</p>}
-      <ul className="bg-white text-xs rounded-lg rounded-t-none">
+      {showDropdown && ( <ul className="bg-white text-xs rounded-lg rounded-t-none">
         {results.map((result) => (
           <>
             <li
@@ -110,7 +127,7 @@ const Search = ({ map, className }: SearchProps) => {
             <div className="border-b" />
           </>
         ))}
-      </ul>
+      </ul>)}
     </div>
   );
 };
