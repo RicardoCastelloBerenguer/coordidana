@@ -50,13 +50,13 @@ const ComboboxButton = ({ classname }: { classname?: string }) => {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="justify-between w-[210px]"
+          className="justify-between w-[120px]"
         >
           {value ? value : "Selecciona localización"}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[120px] p-0">
         <Command>
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>

@@ -698,7 +698,7 @@ export default function MapComponent() {
       </div>
       <div className="absolute top-0 left-14 sm:left-2 sm:top-12 sm:left-auto max-w-[200px] m-5">
         <div className="flex flex-col gap-3">
-          <Search className="" map={map} />
+          <Search className="hidden" map={map} />
         </div>
       </div>
 

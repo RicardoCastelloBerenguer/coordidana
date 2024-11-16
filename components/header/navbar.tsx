@@ -4,6 +4,7 @@ import { Button, buttonVariants } from "../ui/button";
 import Image from "next/image";
 import AuthMenu from "../auth-menu";
 import { useUser } from "@/app/contexts/UserContext";
+import ComboboxButton from "../ui/boton-combobox";
 
 const Navbar = ({
   className,
@@ -53,7 +54,9 @@ const Navbar = ({
           Como usar
         </Link>
       </li>
-
+    <li>
+     <ComboboxButton  />
+    </li>
       <li>
         {!isLoggedIn ? (
           <AuthMenu>
