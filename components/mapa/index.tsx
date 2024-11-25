@@ -22,6 +22,7 @@ import handleGetLocation from "@/lib/currentLocation";
 import { fetchAndSaveGeoJson } from "@/lib/indexedDB";
 
 import { localizaciones } from "@/app/config/config";
+import {jwtDecode } from 'jwt-decode';
 
 interface Ubicacion {
   latitude: number;
@@ -304,9 +305,26 @@ export default function MapComponent() {
     }
   }, [location]);
 
+  function isTokenExpired(token: any) {
+    if (!token) return true;
+  
+    const decoded = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+  
+    return decoded.exp ? decoded.exp < currentTime : true;
+  }
+
   useEffect(() => {
     if (typeof window !== "undefined" && mapContainer.current) {
       
+    const tokenData = localStorage.getItem("token");
+  
+      if (tokenData && isTokenExpired(tokenData)) {
+        localStorage.removeItem('token'); 
+        window.location.reload();
+      }
+
+
       let idCiudad = localStorage.getItem("current-location")
       if(!idCiudad){
         idCiudad = "VLC";
